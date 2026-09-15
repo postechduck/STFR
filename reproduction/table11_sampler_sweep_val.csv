@@ -1,0 +1,22 @@
+backbone,arm,hp,value,best_epoch,val_recall20,winner
+MF,swap DNS,M,10,27,0.12153,False
+MF,swap DNS,M,2,29,0.12266,False
+MF,swap DNS,M,5,29,0.1276,True
+MF,swap AUC-NS,gamma,0.002,24,0.11493,False
+MF,swap AUC-NS,gamma,0.006,24,0.11535,True
+MF,swap AUC-NS,gamma,0.018,24,0.11348,False
+MF,swap FairNeg,-,default,27,0.11687,True
+LightGCN,swap DNS,M,10,18,0.14106,True
+LightGCN,swap DNS,M,2,29,0.13307,False
+LightGCN,swap DNS,M,5,15,0.14104,False
+LightGCN,swap AUC-NS,gamma,0.002,29,0.14483,True
+LightGCN,swap AUC-NS,gamma,0.006,24,0.1421,False
+LightGCN,swap AUC-NS,gamma,0.018,24,0.14159,False
+LightGCN,swap FairNeg,-,default,27,0.12947,True
+SimGCL,swap DNS,M,10,6,0.12385,False
+SimGCL,swap DNS,M,2,6,0.12497,False
+SimGCL,swap DNS,M,5,6,0.1283,True
+SimGCL,swap AUC-NS,gamma,0.002,3,0.1271,True
+SimGCL,swap AUC-NS,gamma,0.006,3,0.12634,False
+SimGCL,swap AUC-NS,gamma,0.018,9,0.12685,False
+SimGCL,swap FairNeg,-,default,6,0.12379,True

@@ -1,0 +1,28 @@
+{
+  "_comment": "Search spaces of the main comparison (validation Recall@20, seed 20, 30-epoch cap). Values are stfr.train arguments. simgcl_lambda is selected once per dataset on the base model and shared by every method.",
+  "simgcl_lambda": [0.02, 0.05, 0.1, 0.5, 2],
+  "arms": {
+    "base": {"method": "base", "grid": [{}]},
+    "IPS": {"method": "IPS", "grid": [{"ips_lambda": 10}, {"ips_lambda": 30}, {"ips_lambda": 50}]},
+    "DICE": {"method": "DICE", "grid": [{"dice_alpha": 0.05}, {"dice_alpha": 0.1}, {"dice_alpha": 0.2}]},
+    "DDC": {"method": "DDC", "needs_base": true,
+            "grid": [{"ddc_topk": 0.1}, {"ddc_topk": 0.3}, {"ddc_topk": 0.5}, {"ddc_topk": 0.7}]},
+    "PDA": {"method": "PDA",
+            "grid": [{"pda_gamma": 0.05}, {"pda_gamma": 0.1}, {"pda_gamma": 0.25}],
+            "serve_grid": [{"pda_alpha": 0.05}, {"pda_alpha": 0.1}, {"pda_alpha": 0.2}]},
+    "TIDE": {"method": "TIDE",
+             "grid": [{"tide_tau": 3000000}, {"tide_tau": 10000000}, {"tide_tau": 30000000},
+                      {"tide_q": 0, "tide_b": -3, "tide_tau": 3000000}, {"tide_q": 0, "tide_b": -3, "tide_tau": 10000000}, {"tide_q": 0, "tide_b": -3, "tide_tau": 30000000},
+                      {"tide_q": -1, "tide_b": -3, "tide_tau": 3000000}, {"tide_q": -1, "tide_b": -3, "tide_tau": 10000000}, {"tide_q": -1, "tide_b": -3, "tide_tau": 30000000},
+                      {"tide_q": -1, "tide_b": -5, "tide_tau": 3000000}, {"tide_q": -1, "tide_b": -5, "tide_tau": 10000000}, {"tide_q": -1, "tide_b": -5, "tide_tau": 30000000}]},
+    "CausalEPP": {"method": "CausalEPP",
+                  "grid": [{"cepp_smooth": 64, "cepp_alpha": 0.25}, {"cepp_smooth": 64, "cepp_alpha": 0.5}, {"cepp_smooth": 64, "cepp_alpha": 1.0},
+                           {"cepp_smooth": 256, "cepp_alpha": 0.25}, {"cepp_smooth": 256, "cepp_alpha": 0.5}, {"cepp_smooth": 256, "cepp_alpha": 1.0},
+                           {"cepp_smooth": 1024, "cepp_alpha": 0.25}, {"cepp_smooth": 1024, "cepp_alpha": 0.5}, {"cepp_smooth": 1024, "cepp_alpha": 1.0}]},
+    "STFR": {"method": "STFR",
+             "grid": [{"ssns_frac": 0.3, "ssns_alpha": 0.5}, {"ssns_frac": 0.3, "ssns_alpha": 0.75}, {"ssns_frac": 0.3, "ssns_alpha": 1.0},
+                      {"ssns_frac": 0.5, "ssns_alpha": 0.5}, {"ssns_frac": 0.5, "ssns_alpha": 0.75}, {"ssns_frac": 0.5, "ssns_alpha": 1.0},
+                      {"ssns_frac": 0.7, "ssns_alpha": 0.5}, {"ssns_frac": 0.7, "ssns_alpha": 0.75}, {"ssns_frac": 0.7, "ssns_alpha": 1.0},
+                      {"ssns_frac": 0.9, "ssns_alpha": 0.5}, {"ssns_frac": 0.9, "ssns_alpha": 0.75}, {"ssns_frac": 0.9, "ssns_alpha": 1.0}]}
+  }
+}

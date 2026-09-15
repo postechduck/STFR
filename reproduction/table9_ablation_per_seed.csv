@@ -1,0 +1,46 @@
+backbone,variant,seed,recall20,ndcg20,nalrp20,setting,log
+MF,base,20,0.04886,0.02475,0.69878,backbone only,log/runs/v3_Amazon-VG_MF_base_s20_test_k20_train.log
+MF,base,21,0.05589,0.02607,0.73226,backbone only,log/runs/v3_Amazon-VG_MF_base_s21_test_k20_train.log
+MF,base,22,0.05435,0.02601,0.67133,backbone only,log/runs/v3_Amazon-VG_MF_base_s22_test_k20_train.log
+MF,SSNS only,20,0.05563,0.02628,0.72494,"NO_STALE=1 NO_FRESH=1 NEG_POP=champion(f,a) FRESH_NORM=minmax 200ep pat15 eval3",log/runs/v3nobABL_Amazon-VG_MF_Negonly_s20_test_k20.log
+MF,SSNS only,21,0.05518,0.0263,0.6734,"NO_STALE=1 NO_FRESH=1 NEG_POP=champion(f,a) FRESH_NORM=minmax 200ep pat15 eval3",log/runs/v3nobABL_Amazon-VG_MF_Negonly_s21_test_k20.log
+MF,SSNS only,22,0.05504,0.02619,0.65498,"NO_STALE=1 NO_FRESH=1 NEG_POP=champion(f,a) FRESH_NORM=minmax 200ep pat15 eval3",log/runs/v3nobABL_Amazon-VG_MF_Negonly_s22_test_k20.log
+MF,Fresh channel only,20,0.10531,0.05086,0.70014,NO_STALE=1 NEG_POP_FRAC=0 FRESH_NORM=minmax 200ep pat15 eval3,log/runs/v3nobABL_Amazon-VG_MF_Fonly_s20_test_k20.log
+MF,Fresh channel only,21,0.10582,0.0499,0.70289,NO_STALE=1 NEG_POP_FRAC=0 FRESH_NORM=minmax 200ep pat15 eval3,log/runs/v3nobABL_Amazon-VG_MF_Fonly_s21_test_k20.log
+MF,Fresh channel only,22,0.10505,0.0513,0.70005,NO_STALE=1 NEG_POP_FRAC=0 FRESH_NORM=minmax 200ep pat15 eval3,log/runs/v3nobABL_Amazon-VG_MF_Fonly_s22_test_k20.log
+MF,STFR (shared gain),20,0.10779,0.05288,0.66095,"NO_STALE=1 global w_g NEG_POP=champion(f,a) FRESH_NORM=minmax 200ep pat15 eval3",log/runs/v3wgN_VG_MF_s20_test_k20.log
+MF,STFR (shared gain),21,0.10733,0.05261,0.66294,"NO_STALE=1 global w_g NEG_POP=champion(f,a) FRESH_NORM=minmax 200ep pat15 eval3",log/runs/v3wgN_VG_MF_s21_test_k20.log
+MF,STFR (shared gain),22,0.11075,0.05312,0.6545,"NO_STALE=1 global w_g NEG_POP=champion(f,a) FRESH_NORM=minmax 200ep pat15 eval3",log/runs/v3wgN_VG_MF_s22_test_k20.log
+MF,STFR,20,0.11053,0.05513,0.60183,"NO_STALE=1 NEG_POP=champion(f,a) FRESH_NORM=minmax 200ep pat15 eval3",log/runs/v3nob_final_Amazon-VG_MF_SFDmmNoB_f0.7a0.75_s20_test_k20.log
+MF,STFR,21,0.10684,0.0507,0.61039,"NO_STALE=1 NEG_POP=champion(f,a) FRESH_NORM=minmax 200ep pat15 eval3",log/runs/v3nob_final_Amazon-VG_MF_SFDmmNoB_f0.7a0.75_s21_test_k20.log
+MF,STFR,22,0.11334,0.05547,0.57252,"NO_STALE=1 NEG_POP=champion(f,a) FRESH_NORM=minmax 200ep pat15 eval3",log/runs/v3nob_final_Amazon-VG_MF_SFDmmNoB_f0.7a0.75_s22_test_k20.log
+LightGCN,base,20,0.06852,0.03108,0.77187,backbone only,log/runs/v3_Amazon-VG_LightGCN_base_s20_test_k20_train.log
+LightGCN,base,21,0.06776,0.0311,0.77254,backbone only,log/runs/v3_Amazon-VG_LightGCN_base_s21_test_k20_train.log
+LightGCN,base,22,0.06818,0.03098,0.77224,backbone only,log/runs/v3_Amazon-VG_LightGCN_base_s22_test_k20_train.log
+LightGCN,SSNS only,20,0.07267,0.03536,0.69041,"NO_STALE=1 NO_FRESH=1 NEG_POP=champion(f,a) FRESH_NORM=minmax 200ep pat15 eval3",log/runs/v3nobABL_Amazon-VG_LightGCN_Negonly_s20_test_k20.log
+LightGCN,SSNS only,21,0.07871,0.03693,0.689,"NO_STALE=1 NO_FRESH=1 NEG_POP=champion(f,a) FRESH_NORM=minmax 200ep pat15 eval3",log/runs/v3nobABL_Amazon-VG_LightGCN_Negonly_s21_test_k20.log
+LightGCN,SSNS only,22,0.07564,0.03691,0.69,"NO_STALE=1 NO_FRESH=1 NEG_POP=champion(f,a) FRESH_NORM=minmax 200ep pat15 eval3",log/runs/v3nobABL_Amazon-VG_LightGCN_Negonly_s22_test_k20.log
+LightGCN,Fresh channel only,20,0.10273,0.04826,0.75391,NO_STALE=1 NEG_POP_FRAC=0 FRESH_NORM=minmax 200ep pat15 eval3,log/runs/v3nobABL_Amazon-VG_LightGCN_Fonly_s20_test_k20.log
+LightGCN,Fresh channel only,21,0.10334,0.04857,0.75176,NO_STALE=1 NEG_POP_FRAC=0 FRESH_NORM=minmax 200ep pat15 eval3,log/runs/v3nobABL_Amazon-VG_LightGCN_Fonly_s21_test_k20.log
+LightGCN,Fresh channel only,22,0.10177,0.04696,0.75333,NO_STALE=1 NEG_POP_FRAC=0 FRESH_NORM=minmax 200ep pat15 eval3,log/runs/v3nobABL_Amazon-VG_LightGCN_Fonly_s22_test_k20.log
+LightGCN,STFR (shared gain),20,0.11185,0.05757,0.70426,"NO_STALE=1 global w_g NEG_POP=champion(f,a) FRESH_NORM=minmax 200ep pat15 eval3",log/runs/v3wgN_VG_LightGCN_s20_test_k20.log
+LightGCN,STFR (shared gain),21,0.11295,0.057,0.70561,"NO_STALE=1 global w_g NEG_POP=champion(f,a) FRESH_NORM=minmax 200ep pat15 eval3",log/runs/v3wgN_VG_LightGCN_s21_test_k20.log
+LightGCN,STFR (shared gain),22,0.11266,0.05613,0.70688,"NO_STALE=1 global w_g NEG_POP=champion(f,a) FRESH_NORM=minmax 200ep pat15 eval3",log/runs/v3wgN_VG_LightGCN_s22_test_k20.log
+LightGCN,STFR,20,0.12682,0.06198,0.60746,"NO_STALE=1 NEG_POP=champion(f,a) FRESH_NORM=minmax 200ep pat15 eval3",log/runs/v3nob_final_Amazon-VG_LightGCN_SFDmmNoB_f0.7a1.0_s20_test_k20.log
+LightGCN,STFR,21,0.11807,0.06231,0.60671,"NO_STALE=1 NEG_POP=champion(f,a) FRESH_NORM=minmax 200ep pat15 eval3",log/runs/v3nob_final_Amazon-VG_LightGCN_SFDmmNoB_f0.7a1.0_s21_test_k20.log
+LightGCN,STFR,22,0.12003,0.06171,0.64325,"NO_STALE=1 NEG_POP=champion(f,a) FRESH_NORM=minmax 200ep pat15 eval3",log/runs/v3nob_final_Amazon-VG_LightGCN_SFDmmNoB_f0.7a1.0_s22_test_k20.log
+SimGCL,base,20,0.07281,0.03513,0.72152,backbone only,log/runs/v3_Amazon-VG_SimGCL_base_s20_test_k20_train.log
+SimGCL,base,21,0.07623,0.03735,0.72239,backbone only,log/runs/v3_Amazon-VG_SimGCL_base_s21_test_k20_train.log
+SimGCL,base,22,0.07538,0.03585,0.71927,backbone only,log/runs/v3_Amazon-VG_SimGCL_base_s22_test_k20_train.log
+SimGCL,SSNS only,20,0.07439,0.03607,0.71154,"NO_STALE=1 NO_FRESH=1 NEG_POP=champion(f,a) FRESH_NORM=minmax 200ep pat15 eval3",log/runs/v3nobABL_Amazon-VG_SimGCL_Negonly_s20_test_k20.log
+SimGCL,SSNS only,21,0.07984,0.03844,0.71526,"NO_STALE=1 NO_FRESH=1 NEG_POP=champion(f,a) FRESH_NORM=minmax 200ep pat15 eval3",log/runs/v3nobABL_Amazon-VG_SimGCL_Negonly_s21_test_k20.log
+SimGCL,SSNS only,22,0.07559,0.03609,0.7139,"NO_STALE=1 NO_FRESH=1 NEG_POP=champion(f,a) FRESH_NORM=minmax 200ep pat15 eval3",log/runs/v3nobABL_Amazon-VG_SimGCL_Negonly_s22_test_k20.log
+SimGCL,Fresh channel only,20,0.10199,0.04891,0.7349,NO_STALE=1 NEG_POP_FRAC=0 FRESH_NORM=minmax 200ep pat15 eval3,log/runs/v3nobABL_Amazon-VG_SimGCL_Fonly_s20_test_k20.log
+SimGCL,Fresh channel only,21,0.11451,0.05364,0.73173,NO_STALE=1 NEG_POP_FRAC=0 FRESH_NORM=minmax 200ep pat15 eval3,log/runs/v3nobABL_Amazon-VG_SimGCL_Fonly_s21_test_k20.log
+SimGCL,Fresh channel only,22,0.10467,0.05097,0.72122,NO_STALE=1 NEG_POP_FRAC=0 FRESH_NORM=minmax 200ep pat15 eval3,log/runs/v3nobABL_Amazon-VG_SimGCL_Fonly_s22_test_k20.log
+SimGCL,STFR (shared gain),20,0.10508,0.04971,0.73072,"NO_STALE=1 global w_g NEG_POP=champion(f,a) FRESH_NORM=minmax 200ep pat15 eval3",log/runs/v3wgN_VG_SimGCL_s20_test_k20.log
+SimGCL,STFR (shared gain),21,0.1073,0.05259,0.73309,"NO_STALE=1 global w_g NEG_POP=champion(f,a) FRESH_NORM=minmax 200ep pat15 eval3",log/runs/v3wgN_VG_SimGCL_s21_test_k20.log
+SimGCL,STFR (shared gain),22,0.10558,0.05089,0.73283,"NO_STALE=1 global w_g NEG_POP=champion(f,a) FRESH_NORM=minmax 200ep pat15 eval3",log/runs/v3wgN_VG_SimGCL_s22_test_k20.log
+SimGCL,STFR,20,0.11249,0.05259,0.69176,"NO_STALE=1 NEG_POP=champion(f,a) FRESH_NORM=minmax 200ep pat15 eval3",log/runs/v3nob_final_Amazon-VG_SimGCL_SFDmmNoB_f0.7a0.75_s20_test_k20.log
+SimGCL,STFR,21,0.11237,0.05381,0.69168,"NO_STALE=1 NEG_POP=champion(f,a) FRESH_NORM=minmax 200ep pat15 eval3",log/runs/v3nob_final_Amazon-VG_SimGCL_SFDmmNoB_f0.7a0.75_s21_test_k20.log
+SimGCL,STFR,22,0.11526,0.05519,0.6899,"NO_STALE=1 NEG_POP=champion(f,a) FRESH_NORM=minmax 200ep pat15 eval3",log/runs/v3nob_final_Amazon-VG_SimGCL_SFDmmNoB_f0.7a0.75_s22_test_k20.log

@@ -1,0 +1,31 @@
+{
+  "_comment": "Control arms of Section 7.3 (Amazon-VG). 'inherit': start from the cell's selected STFR configuration (selection.json or --selected); 'inherit_map' copies an inherited value into another argument; 'args' override; 'flags' are boolean switches. Arms with a 'grid' are searched on validation (seed 20, 30 epochs) before the three-seed finals; the others go straight to finals.",
+  "arms": {
+    "SSNS_only":   {"method": "base", "inherit": "STFR"},
+    "fresh_only":  {"method": "STFR", "inherit": "STFR", "args": {"ssns_frac": 0}},
+    "shared_gain": {"method": "STFR", "inherit": "STFR", "flags": ["--shared_gain"]},
+
+    "recent1":  {"method": "base", "args": {"recent_blocks": 1}},
+    "recent2":  {"method": "base", "args": {"recent_blocks": 2}},
+    "recent3":  {"method": "base", "args": {"recent_blocks": 3}},
+    "recent6":  {"method": "base", "args": {"recent_blocks": 6}},
+    "recent12": {"method": "base", "args": {"recent_blocks": 12}},
+    "recent24": {"method": "base", "args": {"recent_blocks": 24}},
+    "recent1_fresh":  {"method": "STFR", "args": {"ssns_frac": 0, "recent_blocks": 1}},
+    "recent2_fresh":  {"method": "STFR", "args": {"ssns_frac": 0, "recent_blocks": 2}},
+    "recent3_fresh":  {"method": "STFR", "args": {"ssns_frac": 0, "recent_blocks": 3}},
+    "recent6_fresh":  {"method": "STFR", "args": {"ssns_frac": 0, "recent_blocks": 6}},
+    "recent12_fresh": {"method": "STFR", "args": {"ssns_frac": 0, "recent_blocks": 12}},
+    "recent24_fresh": {"method": "STFR", "args": {"ssns_frac": 0, "recent_blocks": 24}},
+
+    "swap_DNS":     {"method": "STFR", "inherit": "STFR", "inherit_map": {"neg_sampler_frac": "ssns_frac"},
+                     "args": {"ssns_frac": 0, "neg_sampler": "dns"},
+                     "grid": [{"dns_m": 2}, {"dns_m": 5}, {"dns_m": 10}]},
+    "swap_AUCNS":   {"method": "STFR", "inherit": "STFR", "inherit_map": {"neg_sampler_frac": "ssns_frac"},
+                     "args": {"ssns_frac": 0, "neg_sampler": "aucns", "aucns_alpha": 0.75, "aucns_beta": 0.01, "aucns_m": 5, "aucns_n": 10},
+                     "grid": [{"aucns_gamma": 0.002}, {"aucns_gamma": 0.006}, {"aucns_gamma": 0.018}]},
+    "swap_FairNeg": {"method": "STFR", "inherit": "STFR", "inherit_map": {"neg_sampler_frac": "ssns_frac"},
+                     "args": {"ssns_frac": 0, "neg_sampler": "fairneg"},
+                     "grid": [{}]}
+  }
+}

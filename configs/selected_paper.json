@@ -1,0 +1,60 @@
+{
+  "_comment": "Configurations selected by validation Recall@20 in the manuscript (Appendix, hyperparameter table). TIDE entries without tide_q/tide_b use the dataset/backbone defaults of stfr/config.py. Use with scripts/run_cell.py --selected to skip the search.",
+  "Amazon-VG/MF": {
+    "simgcl_lambda": null,
+    "IPS": {"ips_lambda": 10}, "DICE": {"dice_alpha": 0.05}, "DDC": {"ddc_topk": 0.3},
+    "PDA": {"pda_gamma": 0.25, "pda_alpha": 0.2}, "TIDE": {"tide_tau": 3000000},
+    "CausalEPP": {"cepp_smooth": 1024, "cepp_alpha": 1.0}, "STFR": {"ssns_frac": 0.7, "ssns_alpha": 0.75}
+  },
+  "Amazon-VG/LightGCN": {
+    "simgcl_lambda": null,
+    "IPS": {"ips_lambda": 50}, "DICE": {"dice_alpha": 0.05}, "DDC": {"ddc_topk": 0.7},
+    "PDA": {"pda_gamma": 0.25, "pda_alpha": 0.2}, "TIDE": {"tide_q": -1, "tide_b": -5, "tide_tau": 3000000},
+    "CausalEPP": {"cepp_smooth": 256, "cepp_alpha": 1.0}, "STFR": {"ssns_frac": 0.7, "ssns_alpha": 1.0}
+  },
+  "Amazon-VG/SimGCL": {
+    "simgcl_lambda": 0.1,
+    "IPS": {"ips_lambda": 30}, "DICE": {"dice_alpha": 0.05}, "DDC": {"ddc_topk": 0.3},
+    "PDA": {"pda_gamma": 0.25, "pda_alpha": 0.2}, "TIDE": {"tide_q": -1, "tide_b": -3, "tide_tau": 3000000},
+    "CausalEPP": {"cepp_smooth": 64, "cepp_alpha": 0.25}, "STFR": {"ssns_frac": 0.7, "ssns_alpha": 0.75}
+  },
+  "Amazon-Movies/MF": {
+    "simgcl_lambda": null,
+    "IPS": {"ips_lambda": 30}, "DICE": {"dice_alpha": 0.2}, "DDC": {"ddc_topk": 0.7},
+    "PDA": {"pda_gamma": 0.25, "pda_alpha": 0.2}, "TIDE": {"tide_q": -1, "tide_b": -5, "tide_tau": 3000000},
+    "CausalEPP": {"cepp_smooth": 1024, "cepp_alpha": 0.25}, "STFR": {"ssns_frac": 0.3, "ssns_alpha": 0.5}
+  },
+  "Amazon-Movies/LightGCN": {
+    "simgcl_lambda": null,
+    "IPS": {"ips_lambda": 50}, "DICE": {"dice_alpha": 0.1}, "DDC": {"ddc_topk": 0.7},
+    "PDA": {"pda_gamma": 0.25, "pda_alpha": 0.2}, "TIDE": {"tide_q": -1, "tide_b": -5, "tide_tau": 3000000},
+    "CausalEPP": {"cepp_smooth": 256, "cepp_alpha": 0.25}, "STFR": {"ssns_frac": 0.3, "ssns_alpha": 0.5}
+  },
+  "Amazon-Movies/SimGCL": {
+    "simgcl_lambda": 0.05,
+    "IPS": {"ips_lambda": 10}, "DICE": {"dice_alpha": 0.05}, "DDC": {"ddc_topk": 0.7},
+    "PDA": {"pda_gamma": 0.25, "pda_alpha": 0.2}, "TIDE": {"tide_q": -1, "tide_b": -5, "tide_tau": 3000000},
+    "CausalEPP": {"cepp_smooth": 64, "cepp_alpha": 1.0}, "STFR": {"ssns_frac": 0.5, "ssns_alpha": 0.5}
+  },
+  "Douban-movie/MF": {
+    "simgcl_lambda": null,
+    "IPS": {"ips_lambda": 10}, "DICE": {"dice_alpha": 0.2}, "DDC": {"ddc_topk": 0.7},
+    "PDA": {"pda_gamma": 0.1, "pda_alpha": 0.2}, "TIDE": {"tide_tau": 10000000},
+    "CausalEPP": {"cepp_smooth": 256, "cepp_alpha": 1.0}, "STFR": {"ssns_frac": 0.9, "ssns_alpha": 0.5}
+  },
+  "Douban-movie/LightGCN": {
+    "simgcl_lambda": null,
+    "IPS": {"ips_lambda": 10}, "DICE": {"dice_alpha": 0.2}, "DDC": {"ddc_topk": 0.7},
+    "PDA": {"pda_gamma": 0.25, "pda_alpha": 0.1}, "TIDE": {"tide_tau": 3000000},
+    "CausalEPP": {"cepp_smooth": 256, "cepp_alpha": 0.25}, "STFR": {"ssns_frac": 0.3, "ssns_alpha": 0.75}
+  },
+  "Amazon-VG_b15/MF": {"simgcl_lambda": null, "STFR": {"ssns_frac": 0.7, "ssns_alpha": 1.0}},
+  "Amazon-VG_b15/LightGCN": {"simgcl_lambda": null, "STFR": {"ssns_frac": 0.7, "ssns_alpha": 0.75}},
+  "Amazon-VG_b15/SimGCL": {"simgcl_lambda": 0.05, "STFR": {"ssns_frac": 0.7, "ssns_alpha": 1.0}},
+  "Amazon-VG_b30/MF": {"simgcl_lambda": null, "STFR": {"ssns_frac": 0.7, "ssns_alpha": 1.0}},
+  "Amazon-VG_b30/LightGCN": {"simgcl_lambda": null, "STFR": {"ssns_frac": 0.7, "ssns_alpha": 1.0}},
+  "Amazon-VG_b30/SimGCL": {"simgcl_lambda": 0.1, "STFR": {"ssns_frac": 0.9, "ssns_alpha": 1.0}},
+  "Amazon-VG_b120/MF": {"simgcl_lambda": null, "STFR": {"ssns_frac": 0.5, "ssns_alpha": 1.0}},
+  "Amazon-VG_b120/LightGCN": {"simgcl_lambda": null, "STFR": {"ssns_frac": 0.7, "ssns_alpha": 1.0}},
+  "Amazon-VG_b120/SimGCL": {"simgcl_lambda": 0.05, "STFR": {"ssns_frac": 0.9, "ssns_alpha": 1.0}}
+}

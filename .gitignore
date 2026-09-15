@@ -1,0 +1,19 @@
+# data and run artifacts
+data/*/
+!data/reference/
+data_raw/
+runs/
+results/
+*.pth
+*.npz
+*.log
+
+# compiled C++ module
+cppcode/*.so
+cppcode/.rendered.*
+cppcode/*.o
+
+# python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
