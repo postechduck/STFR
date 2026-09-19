@@ -1,6 +1,6 @@
 """Evaluate a saved checkpoint on the validation or test split at a cutoff K.
 
-  python -m stfr.eval_ckpt --run_dir runs/.../STFR_f0.7a0.75_s20 --split test --topk 20 --rank_dump --dump_recs
+  python -m stfr.eval_ckpt --run_dir runs/.../STFR_f0.7a0.75_s20 --split test --topk 20 --dump_recs
 
 The model settings are read from <run_dir>/config.json; only the evaluation
 options are overridden.  Outputs in run_dir: <split>_k<K>.log, <split>_k<K>.json

@@ -91,7 +91,7 @@ def main(argv=None):
     max_time = train_data['timestamp'].max()
 
     ext_sampler = None
-    if opt.neg_sampler in ('pns', 'fairneg'):
+    if opt.neg_sampler == 'fairneg':
         from stfr.samplers import ExtNegSampler
         assert opt.ssns_frac == 0, '--neg_sampler replaces SSNS; set --ssns_frac 0'
         ext_sampler = ExtNegSampler(train_data, opt.item_num, opt.neg_sampler, opt)

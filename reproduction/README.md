@@ -41,9 +41,9 @@ Displayed values are `'%.4f'` of the mean of the recorded values (`display` in
 `analysis/common.py`).  Four accuracy means fall exactly on a rounding boundary of the
 five-decimal records (VG / LightGCN DICE N@20 0.02785, Movies / LightGCN TIDE N@20 0.02815,
 Movies / SimGCL IPS R@20 0.05175, Douban / MF IPS R@20 0.02975); this rule prints
-.0278 / .0281 / .0517 / .0297.  The manuscript prints .0282 for the TIDE cell and agrees in
-the other 127 accuracy cells; at full precision (recomputed from the list dumps) that mean
-is 0.028149.  No rank depends on it.
+.0278 / .0281 / .0517 / .0297, as in the manuscript (all 128 accuracy cells agree).  At full
+precision (recomputed from the list dumps) the TIDE mean is 0.028149.  No rank depends on
+these four cells.
 
 ## Outputs of the analysis scripts on the original runs (`tables/`)
 

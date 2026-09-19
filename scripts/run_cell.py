@@ -110,7 +110,7 @@ class Cell:
         cmd = [PY, '-m', 'stfr.eval_ckpt', '--run_dir', run_dir, '--split', split, '--topk', str(k),
                '--device', self.a.device, '--eval_users', str(eval_users)]
         if dumps:
-            cmd += ['--rank_dump', '--dump_recs']
+            cmd += ['--dump_recs']
         return cmd
 
     @staticmethod

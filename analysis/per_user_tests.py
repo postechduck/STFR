@@ -10,7 +10,7 @@ list dump stops the script with the command that writes it; nothing is substitut
 Table A.1 (per_user_tests.csv): for every setting and metric (Recall@20, NDCG@20) the
 opponent is the compared method with the highest test mean of that metric.  Each user's
 metric is averaged over the three seeds (users present in every seed) and compared with a
-two-sided paired t-test (Wilcoxon signed-rank p also written).  Unrounded per-user values;
+two-sided paired t-test.  Unrounded per-user values;
 no multiple-comparison adjustment.
 
 Table 8 (calib_table.csv, calib_per_seed.csv): Calib@20(u) = |mean d(top-20) - mean d(targets)|
@@ -35,13 +35,9 @@ def paired(a, b, lower_better=False):
     y = np.array([b[u] for u in users])
     diff = (y - x) if lower_better else (x - y)
     t = stats.ttest_rel(x, y)
-    try:
-        pw = float(stats.wilcoxon(x, y, zero_method='wilcox').pvalue)
-    except ValueError:
-        pw = np.nan
     return dict(n=len(users), focal_mean=float(x.mean()), opponent_mean=float(y.mean()),
                 delta=float((x - y).mean()), delta_pct=100.0 * float((x - y).mean()) / float(y.mean()) if y.mean() else np.nan,
-                focal_win_frac=float((diff > 0).mean()), p_t=float(t.pvalue), p_wilcoxon=pw)
+                focal_win_frac=float((diff > 0).mean()), p_t=float(t.pvalue))
 
 
 def main():

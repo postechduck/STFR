@@ -89,7 +89,9 @@ dump (`test_ranks.npz`, 1 + the number of items scored strictly higher than the 
 is an optional raw output and no table is computed from it, because targets with tied
 scores share a rank there while a list gives them distinct positions.
 
-All analysis scripts read the run layout of `scripts/run_cell.py` (`--runs runs`) and
-write to `results/` (`--out`).  None of them trains a model or ranks users again:
-tables are aggregated from the saved test metrics and list dumps, and the geometry
-script only reads the saved checkpoints.
+Analyses of trained models read saved run outputs, recommendation lists or checkpoints
+in the run layout of `scripts/run_cell.py` (`--runs runs`).  Dataset statistics
+(`analysis/dataset_stats.py`) and the popularity-prior diagnostics
+(`analysis/popularity_signals.py`) read the preprocessed data instead (`--datasets`); the
+latter constructs popularity-based rankings.  None of these scripts trains a model, and
+all write to `results/` (`--out`).  See each script's arguments for its required inputs.

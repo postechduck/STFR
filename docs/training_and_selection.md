@@ -29,22 +29,22 @@ runs/<data>/<backbone>/lamsel/L<lambda>/          SimGCL weight selection
 runs/<data>/<backbone>/sweep/<arm>_<config>/      search candidates (serve_<alpha>/ for PDA)
 runs/<data>/<backbone>/final/<arm>_<config>_s<seed>/
     config.json  train.log  best.pth  metrics.json  arm.json
-    test_k20.{log,json}  test_ranks.npz  test_recs_k20.txt
+    test_k20.{log,json}  test_recs_k20.txt
 runs/<data>/<backbone>/selection.json, lambda.json, summary.csv
 ```
 
 `test_recs_k20.txt` stores each user's top-20 list and targets; per-user accuracy, Calib,
 coverage and exposure Gini are computed from it, and a final run whose list dump is
 missing is evaluated again from its checkpoint when `run_cell.py` is re-run.
-`test_ranks.npz` (strict rank of every target item) is an optional raw output that no table
-reads.  Accuracy, nALRP and the list dump of one evaluation use the same top-K set.
+`test_ranks.npz` (strict rank of every target item) is written only with `--rank_dump`; no
+table reads it.  Accuracy, nALRP and the list dump of one evaluation use the same top-K set.
 
 ## Single runs
 
 ```bash
 python -m stfr.train --dataset Amazon-VG --backbone LightGCN --method STFR \
     --ssns_frac 0.7 --ssns_alpha 1.0 --seed 20 --run_dir runs/demo/vg_lgcn_stfr_s20
-python -m stfr.eval_ckpt --run_dir runs/demo/vg_lgcn_stfr_s20 --split test --topk 20 --rank_dump --dump_recs
+python -m stfr.eval_ckpt --run_dir runs/demo/vg_lgcn_stfr_s20 --split test --topk 20 --dump_recs
 ```
 
 `bash scripts/train_eval.sh <run_dir> <train arguments>` chains the two commands.
@@ -57,8 +57,7 @@ backbone-specific defaults of `stfr/config.py`.
 `analysis/per_user_tests.py` computes each user's metric from the saved top-20 lists,
 averages it over the three seeds (users evaluated in every seed) and compares STFR with
 the compared method that has the highest test mean for the metric at hand, using an
-unadjusted two-sided paired t-test on the unrounded per-user values (Wilcoxon signed-rank
-p-values are also written).  The opponent choice is
+unadjusted two-sided paired t-test on the unrounded per-user values.  The opponent choice is
 descriptive and separate from validation-based selection.  Non-significance does not
 establish equivalence.
 

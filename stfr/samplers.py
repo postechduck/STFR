@@ -1,11 +1,10 @@
 """Negative samplers used as controls in the sampler-replacement comparison.
 
-``pns`` and ``fairneg`` replace a share of the uniform negatives after they are
+``fairneg`` replaces a share of the uniform negatives after they are
 drawn (``ExtNegSampler.resample``); ``dns`` and ``aucns`` are batch-level
 dynamic samplers that score candidates with the current model and are applied
 inside the training loop.
 
-  pns      popularity-based negative sampling, p(j) ~ cnt_j^beta
   fairneg  FairNeg (Chen et al., WWW'23): group sampling probabilities updated
            each epoch from per-group positive losses; groups are popularity
            deciles here, within-group uniform
@@ -50,10 +49,7 @@ class ExtNegSampler:
         self.cnt = cnt
         self.pos_keys = np.sort(users * num_item + items)
         self._epoch = 0
-        if mode == 'pns':
-            p = cnt ** float(opt.pns_beta)
-            self.cdf = np.cumsum(p / p.sum())
-        elif mode == 'fairneg':
+        if mode == 'fairneg':
             G = int(opt.fairneg_groups)
             self.outer_lr = float(opt.fairneg_lr)
             order = np.argsort(cnt, kind='stable')

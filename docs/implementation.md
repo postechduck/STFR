@@ -7,7 +7,7 @@
 | `stfr/config.py` | arguments, dataset / backbone defaults, run directories |
 | `stfr/signals.py` | stale signal d_i, fresh signal P_i^t, PDA / DICE / CausalEPP tables, decayed popularity (C++) |
 | `stfr/data.py` | BPR triplets with the SSNS negative sampler (and the DICE margin sampler) |
-| `stfr/samplers.py` | DNS, AUC-NS and FairNeg samplers used as controls (Table 11); PNS is an auxiliary option not used in any reported table |
+| `stfr/samplers.py` | DNS, AUC-NS and FairNeg samplers used as controls (Table 11) |
 | `stfr/models.py` | MF / LightGCN / SimGCL backbones; base, STFR, IPS, DICE, DDC, PDA, TIDE, CausalEPP scores |
 | `stfr/evaluate.py` | full-catalog evaluation, method-specific serving scores, dumps |
 | `stfr/train.py`, `stfr/eval_ckpt.py` | entry points |
@@ -50,7 +50,7 @@ number unless it is needed, so the negatives of a given seed are unchanged.
 | DDC | port of the official two-stage procedure: frozen base embeddings, per-user offsets along the popularity direction (head-tail centroid difference) and the user's preference direction |
 | LightGCN | inherited from the TIDE code; the normalized graph is built sparsely (identical values) |
 | SimGCL | encoder and InfoNCE ported from the SELFRec implementation: per-layer noise of fixed norm, two perturbed passes, ego layer excluded from the layer mean, InfoNCE over the batch's unique users and positive items |
-| PNS / DNS / AUC-NS / FairNeg | `stfr/samplers.py`; AUC-NS follows the authors' released code, FairNeg's genre groups are replaced by popularity deciles |
+| DNS / AUC-NS / FairNeg | `stfr/samplers.py`; AUC-NS follows the authors' released code, FairNeg's genre groups are replaced by popularity deciles |
 
 ## Environment used for the manuscript
 

@@ -108,7 +108,7 @@ bash scripts/train_eval.sh runs/demo/vg_mf_stfr_s20 --dataset Amazon-VG --backbo
 
 # the same with LightGCN / SimGCL (SimGCL takes the dataset's contrastive weight)
 python -m stfr.train --dataset Amazon-VG --backbone SimGCL --simgcl_lambda 0.1 --method STFR --ssns_frac 0.7 --ssns_alpha 0.75
-python -m stfr.eval_ckpt --run_dir <run_dir> --split test --topk 20 --rank_dump --dump_recs
+python -m stfr.eval_ckpt --run_dir <run_dir> --split test --topk 20 --dump_recs
 
 # compared methods (arguments of their selected configurations: configs/selected_paper.json)
 python -m stfr.train --dataset Amazon-VG --backbone MF --method PDA --pda_gamma 0.25 --pda_alpha 0.2
@@ -173,7 +173,7 @@ STFR against the compared method with the highest mean Recall@20 in each setting
 | VG / LightGCN | .1216 | .0620 | .619 | TIDE | .0896 | .0457 | .755 |
 | VG / SimGCL | .1134 | .0539 | .691 | PDA | .1052 | .0505 | .745 |
 | Movies / MF | .0837 | .0407 | .718 | TIDE | .0741 | .0389 | .725 |
-| Movies / LightGCN | .0808 | .0394 | .747 | TIDE | .0661 | .0282 | .788 |
+| Movies / LightGCN | .0808 | .0394 | .747 | TIDE | .0661 | .0281 | .788 |
 | Movies / SimGCL | .0774 | .0366 | .738 | PDA | .0762 | .0368 | .811 |
 | Douban / MF | .1090 | .0733 | .708 | TIDE | .1144 | .0775 | .710 |
 | Douban / LightGCN | .1200 | .0756 | .699 | TIDE | .0786 | .0600 | .833 |

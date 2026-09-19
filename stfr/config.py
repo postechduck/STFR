@@ -15,7 +15,7 @@ import time
 
 BACKBONES = ('MF', 'LightGCN', 'SimGCL')
 METHODS = ('base', 'STFR', 'IPS', 'DICE', 'DDC', 'PDA', 'TIDE', 'CausalEPP')
-NEG_SAMPLERS = ('none', 'pns', 'dns', 'aucns', 'fairneg')
+NEG_SAMPLERS = ('none', 'dns', 'aucns', 'fairneg')
 
 # Shared backbone settings (all datasets).
 BACKBONE_HP = {
@@ -82,9 +82,7 @@ def build_parser():
     g = p.add_argument_group('negative-sampler controls (replace SSNS)')
     g.add_argument('--neg_sampler', default='none', choices=NEG_SAMPLERS)
     g.add_argument('--neg_sampler_frac', type=float, default=1.0,
-                   help='share of uniform negatives replaced by the sampler (pns, fairneg)')
-    # pns is an auxiliary option (named in Section 6.2 but not part of any reported table)
-    g.add_argument('--pns_beta', type=float, default=0.75, help='auxiliary PNS control (not in the reported tables)')
+                   help='share of uniform negatives replaced by the sampler (fairneg)')
     g.add_argument('--dns_m', type=int, default=5, help='DNS candidates per positive')
     g.add_argument('--aucns_alpha', type=float, default=0.75)
     g.add_argument('--aucns_beta', type=float, default=0.01)
