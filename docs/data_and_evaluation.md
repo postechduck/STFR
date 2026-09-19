@@ -4,8 +4,8 @@
 
 | Dataset | Source | Preprocessing | Users | Items |
 | --- | --- | --- | --- | --- |
-| Amazon-VG | Amazon review data, Video Games category | 5-core, dense ids, first interaction per (user, item) | 55,144 | 17,286 |
-| Amazon-Movies | Amazon review data, Movies & TV category | 5-core, dense ids, first interaction per (user, item) | 297,377 | 59,925 |
+| Amazon-VG | Amazon Review Data (2018), Video Games, 5-core review file `Video_Games_5.json.gz` (497,577 reviews) | inherited 5-core filter, dense ids, first interaction per (user, item) | 55,144 | 17,286 |
+| Amazon-Movies | Amazon Review Data (2018), Movies and TV, ratings-only file `Movies_and_TV.csv` (8,765,568 ratings) | inherited 5-core filter, dense ids, first interaction per (user, item) | 297,377 | 59,925 |
 | Douban-Movie | socialRec DoubanMovie dump (`Douban.tar.gz`, `movie/douban_movie.tsv`) | interactions after 2010-01-01, iterative 10-core, first interaction per (user, item) | 48,799 | 26,813 |
 
 `prep/adapters/` writes `data_raw/<dataset>/raw_interactions.csv` (tab-separated
@@ -14,18 +14,44 @@
 ```bash
 # Douban: download the socialRec dump, then
 python prep/adapters/douban.py --tsv data_raw/Douban/movie/douban_movie.tsv
-# Amazon: preprocessed 5-core interaction files with dense ids (merged into one file), or
-#         a raw ratings csv (user,item,rating,timestamp) filtered to 5-core by the adapter
-python prep/adapters/amazon.py --dataset Amazon-VG --src_files <dir>/train_data.csv <dir>/val_data.csv <dir>/test_data.csv
-python prep/adapters/amazon.py --dataset Amazon-Movies --src_raw ratings_Movies_and_TV.csv --core 5
+# Amazon Review Data (2018), https://nijianmo.github.io/amazon/ (Ni et al., 2019)
+python prep/adapters/amazon.py --dataset Amazon-VG --src_reviews Video_Games_5.json.gz
+python prep/adapters/amazon.py --dataset Amazon-Movies --src_reviews Movies_and_TV.csv
 ```
 
-The Amazon experiments used 5-core interaction files with dense ids that were
-prepared before this project (the `--src_files` path); an adapter for raw review
-dumps (`--src_raw`) is provided for convenience but does not reproduce those ids
-exactly.  `data/reference/<dataset>.json` records the metadata of the splits used
-in the manuscript (numbers of users, items, interactions, evaluation block); compare
-it with your `data/<dataset>/dataset_meta.json` after preprocessing.
+Amazon preprocessing, in order (`--src_reviews`):
+
+1. Read (reviewerID, asin, rating, unix time) of every row; repeated reviews of the same
+   (user, item) pair are still present at this stage.
+2. The 5-core filter inherited from the code base the experiments started from: every
+   round keeps the users with at least five rows on still-kept items and then the items
+   with at least five rows among the users kept in the previous round, until a round
+   removes nothing.  (It is not the usual simultaneous k-core; `--src_raw` applies that
+   one and yields a different item set.)  Result: 496,904 rows / 55,144 users / 17,286
+   items (VG) and 3,408,612 / 297,377 / 59,925 (Movies).
+3. Dense ids = position of the original id in the sorted list of the kept reviewerID /
+   asin strings (`data_raw/<dataset>/user_ids.csv`, `item_ids.csv`).
+4. `prep/prep_split.py` keeps the first interaction per (user, item) and builds the split.
+
+This reproduces the manuscript's interaction set and ids exactly (checked from the
+ratings-only Movies file and, for Video Games, from a stored copy of the review records
+with the 5-core file's 497,577 rows).  The manuscript's input files additionally carried an
+arbitrary order of rows with equal timestamps, inherited from an earlier split of the same
+data; the adapter writes rows in (timestamp, user, item) order instead.  The order affects
+the byte content of the split files and the composition of mini-batches, not which
+interactions are training, validation or test, the targets, the masks or any popularity
+statistic.  `--src_files` merges already preprocessed dense-id files as they are.
+
+```bash
+python prep/verify_data.py --dataset Amazon-VG        # after prep_split.py; also Amazon-Movies, Douban-movie
+```
+
+compares your `data/<dataset>/` (and `data_raw/<dataset>/raw_interactions.csv`) with
+`data/reference/checksums.json`: SHA-256 digests of the manuscript's files and
+order-independent digests of their content (interaction sets, targets, masks,
+training-block popularity tables, block edges).  "content same" on every line means the
+split is the manuscript's.  `data/reference/<dataset>.json` records the metadata of the
+splits (numbers of users, items, interactions, evaluation block).
 
 ## Chronological split (`prep/prep_split.py`)
 
@@ -60,17 +86,25 @@ validation covers (start, cut) and test [cut, end).
 
 ## Evaluation targets and candidates
 
-* Validation targets require training history; test targets require training or
-  validation history.  Targets are restricted to items with at least one training
-  interaction and are unique per user (the split guarantees they are disjoint from the
-  masked history).  Users without a remaining target are not evaluated.
+* Validation and test users both need interactions in the training period: a user
+  who first appears in the validation window is not a test user.  Targets are restricted
+  to items with at least one training interaction and are unique per user (the split
+  guarantees they are disjoint from the masked history).  Users without a remaining
+  target are not evaluated.
 * Every evaluated user is ranked against the full catalog; the observed history is
-  masked (training history for validation, training plus validation history for test).
-  No candidate sampling.
+  masked (training history for validation; training history plus the user's filtered
+  validation targets for test).  No candidate sampling.
 * Model inputs (embeddings, graphs, popularity signals) are computed from training data
   for validation and test alike; only the mask grows with time.
-* The fresh anchor of STFR (and the serving time of TIDE / CausalEPP popularity) is the
-  last completed training block t\*-1 for validation and test.
+* Serving-time popularity inputs differ by method and are kept as each method defines
+  them; all of them are computed from training interactions only.
+  STFR: the fresh signal of the last completed training block t\*-1, for validation and
+  test alike.  PDA: its per-block popularity of blocks t\*-2 and t\*-1, linearly
+  extrapolated.  TIDE: the time-decayed popularity of the training interactions evaluated
+  at the last training timestamp for validation and at the validation/test cut for test
+  (the end of the input observed at test time).  CausalEPP: the same decayed popularity
+  evaluated at the end of block t\*-1 for validation and at the validation/test cut for
+  test; its per-block item popularity and user sensitivity tables are read at block t\*-1.
 
 | Count | VG val | VG test | Movies val | Movies test | Douban val | Douban test |
 | --- | --- | --- | --- | --- | --- | --- |

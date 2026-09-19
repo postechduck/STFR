@@ -2,10 +2,12 @@
 
 For every positive (u, i, t) the dataset draws ``num_neg`` negatives.  A
 negative starts as a uniform draw from the catalog that is redrawn while it
-collides with the user's training history.  With probability ``ssns_frac`` it
-is then replaced by a draw proportional to c_j^alpha (cumulative training
-counts); a stale-proportional draw that lands in the user's history keeps the
-uniform candidate instead (Appendix S.3 of the manuscript).
+collides with the user's training history (up to 16 rounds; a candidate that
+still collides is replaced by an exact uniform draw from the items outside the
+history, so a returned negative is never a training positive of the user).
+With probability ``ssns_frac`` it is then replaced by a draw proportional to
+c_j^alpha (cumulative training counts); a stale-proportional draw that lands in
+the user's history keeps the uniform candidate instead.
 """
 import numpy as np
 from torch.utils.data import Dataset
@@ -30,6 +32,11 @@ class TripletDataset(Dataset):
         # (user, item) keys of the training positives, sorted for collision tests
         self.pos_keys = np.sort(features['user'].values.astype(np.int64) * item_num
                                 + features['item'].values.astype(np.int64))
+        full = features.groupby('user')['item'].nunique()
+        full = full[full >= item_num]
+        if len(full):
+            raise ValueError('no negative item exists for user(s) %s: their training history covers the whole catalog'
+                             % full.index.tolist()[:10])
         # DICE: popularity-conditioned negative pools (official sampler semantics)
         self.dice_sampling = dice_sampling
         if dice_sampling:
@@ -42,17 +49,30 @@ class TripletDataset(Dataset):
             self.dice_margin = float(dice_margin)
             self.dice_pool = int(dice_pool)
 
+    def _collides(self, users_rep, items):
+        keys = users_rep * self.num_item + items
+        idx = np.searchsorted(self.pos_keys, keys)
+        return (idx < len(self.pos_keys)) & (self.pos_keys[np.minimum(idx, len(self.pos_keys) - 1)] == keys)
+
+    def _outside_history(self, user):
+        """Exact uniform draw from the items outside the user's training history."""
+        lo, hi = np.searchsorted(self.pos_keys, [user * self.num_item, (user + 1) * self.num_item])
+        hist = np.unique(self.pos_keys[lo:hi] - user * self.num_item)
+        r = int(np.random.randint(0, self.num_item - len(hist)))
+        # r-th item of the complement: shift r past every history item at or below it
+        return r + int(np.searchsorted(hist - np.arange(len(hist)), r, side='right'))
+
     def _uniform_negatives(self, users_rep):
         n = len(users_rep)
         neg = np.random.randint(0, self.num_item, size=n, dtype=np.int64)
         for _ in range(16):
-            keys = users_rep * self.num_item + neg
-            idx = np.searchsorted(self.pos_keys, keys)
-            bad = (idx < len(self.pos_keys)) & \
-                  (self.pos_keys[np.minimum(idx, len(self.pos_keys) - 1)] == keys)
+            bad = self._collides(users_rep, neg)
             if not bad.any():
-                break
+                return neg
             neg[bad] = np.random.randint(0, self.num_item, size=int(bad.sum()), dtype=np.int64)
+        # candidates that still collide after the last round (no random number is consumed otherwise)
+        for j in np.flatnonzero(self._collides(users_rep, neg)):
+            neg[j] = self._outside_history(int(users_rep[j]))
         return neg
 
     def _dice_negatives(self, users_rep, items_pos_rep):
@@ -72,11 +92,7 @@ class TripletDataset(Dataset):
         unpop_idx = (r * np.maximum(lo, 1)).astype(np.int64)
         drawn = np.where(use_pop, order[np.minimum(pop_idx, n_items - 1)],
                          order[np.minimum(unpop_idx, n_items - 1)])
-        keys = users_rep * n_items + drawn
-        idx = np.searchsorted(self.pos_keys, keys)
-        clean = ~((idx < len(self.pos_keys)) &
-                  (self.pos_keys[np.minimum(idx, len(self.pos_keys) - 1)] == keys))
-        take = ok & clean
+        take = ok & ~self._collides(users_rep, drawn)
         neg[take] = drawn[take]
         return neg
 
@@ -93,10 +109,7 @@ class TripletDataset(Dataset):
             mask = np.random.random(item_negative.shape[0]) < self.ssns_frac
             n_rep = int(mask.sum())
             cand = np.searchsorted(self.ssns_cdf, np.random.random(n_rep)).astype(np.int64)
-            keys = users_rep[mask] * self.num_item + cand
-            ok = np.searchsorted(self.pos_keys, keys)
-            ok = ~((ok < len(self.pos_keys)) &
-                   (self.pos_keys[np.minimum(ok, len(self.pos_keys) - 1)] == keys))
+            ok = ~self._collides(users_rep[mask], cand)
             idx = np.where(mask)[0][ok]
             item_negative[idx] = cand[ok]
 

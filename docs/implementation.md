@@ -15,6 +15,7 @@
 | `prep/` | dataset adapters and the chronological split |
 | `scripts/` | protocol driver and experiment scripts |
 | `analysis/` | tables and figures from saved outputs (no training) |
+| `reproduction/` | records of the manuscript's runs and scripts that re-aggregate them |
 
 ## STFR
 
@@ -25,11 +26,17 @@ softplus(w_i) = 1 (`--shared_gain` replaces them by one scalar).  Both signals a
 computed once from the training split (`stfr/signals.py`).
 
 SSNS (`stfr/data.py`): a negative starts as a uniform draw from the catalog, redrawn
-while it collides with the user's training positives (up to 16 rounds).  With
-probability f it is replaced by a draw from the catalog-level distribution
-proportional to c_j^alpha (inverse-transform sampling on the cumulative distribution);
-a replacement that collides with the user's training positives is discarded and the
-uniform candidate is kept.  This is the per-user distribution of Appendix S.3.
+while it collides with the user's training positives (up to 16 rounds); a candidate
+that still collides after the last round is replaced by an exact uniform draw from the
+items outside the user's history, so no returned negative is a training positive (a
+user whose history covers the whole catalog is rejected when the dataset is built).
+With probability f the candidate is replaced by a draw from the catalog-level
+distribution proportional to c_j^alpha (inverse-transform sampling on the cumulative
+distribution); a replacement that collides with the user's training positives is
+discarded and the uniform candidate is kept.  The 16-round limit was never the binding
+case in the reported runs: the expected number of candidates still colliding after it
+is below 1e-12 per epoch on every dataset, and the exact fallback consumes no random
+number unless it is needed, so the negatives of a given seed are unchanged.
 
 ## Compared methods
 
@@ -52,6 +59,11 @@ cuDNN 9.10), NumPy 2.5.1, pandas 3.0.0, SciPy 1.17.0, pybind11 3.0.4, cppimport 
 matplotlib 3.10.8.  `requirements.txt` lists the minimum versions; the code also runs on
 CPU (`--device cpu`).
 
-Runs are deterministic for a given seed and device (`torch.backends.cudnn.deterministic`
-is set); results can differ across GPU models and library versions at the level of
-floating-point rounding.
+The NumPy and PyTorch seeds are fixed and `torch.backends.cudnn.deterministic` is set.
+What was verified: on CPU, two training epochs on Amazon-VG (every method with MF; base,
+STFR and TIDE with LightGCN; base and STFR with SimGCL) match the original experiment
+code to the printed digits, and saved checkpoints of the reported runs re-evaluate to
+their logged test metrics.  Bit-identical repetition of a full GPU
+training run was not tested (sparse graph products and scatter operations on CUDA are
+not guaranteed to be deterministic); results can also differ across GPU models and
+library versions at the level of floating-point rounding.

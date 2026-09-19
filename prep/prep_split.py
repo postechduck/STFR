@@ -12,9 +12,10 @@ Protocol
      instead (block-configuration study: same evaluation start for every block length).
   4. Inside t*: the first --val_days days are validation, the rest is test.  Training =
      all interactions before t*; blocks after t* are discarded.
-  5. Validation targets need training history; test targets need training or
-     validation history; targets are restricted to items with training interactions.
-     Users are ranked against the full catalog with their observed history masked.
+  5. Validation and test targets both need a user with training history (a user first
+     seen in the validation window is not evaluated); targets are restricted to items
+     with training interactions.  Users are ranked against the full catalog with their
+     observed history masked (test: training history plus the filtered validation targets).
   6. Popularity tables use training interactions only.
 
 Input   data_raw/<dataset>/raw_interactions.csv   (tab-separated: user item rating timestamp; dense ids)
@@ -120,8 +121,8 @@ def main():
     # target eligibility: users with observed history, items with training interactions
     train_users = set(train_df['user'].unique())
     val_df = val_df[val_df['user'].isin(train_users)].copy()
-    trainval_users = train_users | set(val_df['user'].unique())
-    test_df = test_df[test_df['user'].isin(trainval_users)].copy()
+    # validation users are training users, so test eligibility is training history as well
+    test_df = test_df[test_df['user'].isin(train_users)].copy()
     train_items = set(train_df['item'].unique())
     vu0, tu0 = val_df['user'].nunique(), test_df['user'].nunique()
     val_df = val_df[val_df['item'].isin(train_items)].copy()

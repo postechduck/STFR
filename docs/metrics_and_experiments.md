@@ -29,15 +29,23 @@ with GT_u the user's test-window targets; Calib@20 is averaged over users.
 
 ## Mean rank (Tables 4-5)
 
-Within each dataset-backbone setting, the eight compared methods (base, IPS, DICE, DDC,
-PDA, TIDE, CausalEPP, STFR) are ranked on the unrounded three-seed mean of Recall@20 and
-of NDCG@20 (rank 1 = highest).  The mean rank of a method on a backbone averages these
-column ranks over the backbone's datasets: six columns for MF and LightGCN (three
-datasets x two metrics), four for SimGCL (two datasets x two metrics).  Ranks are
-computed on the unrounded means, so equal values at four displayed decimals are not
-ties; the average rank is used only when the unrounded means are exactly equal (none
-occurred in the reported runs).  The non-personalized fresh prior is not ranked.
-`analysis/collect_results.py` writes the ranks and the mean rank into `results/main_table.csv`.
+Ranks are computed from the displayed four-decimal three-seed mean values, with average
+ranks assigned to ties.  Within each dataset-backbone setting the three seeds of every
+compared method (base, IPS, DICE, DDC, PDA, TIDE, CausalEPP, STFR) are averaged first
+(seed values are never rounded before averaging); the mean is formatted to the four
+decimals the table prints, and Recall@20 and NDCG@20 are ranked on that displayed value
+(rank 1 = highest; methods with the same displayed value share the average of their
+ranks).  The mean rank of a method on a backbone averages these column ranks over the
+backbone's datasets: six columns for MF and LightGCN (three datasets x two metrics), four
+for SimGCL (two datasets x two metrics).  The non-personalized fresh prior and nALRP do
+not enter the mean rank.  The table output and the rank key are the same string
+(`display` in `analysis/common.py`); `analysis/collect_results.py` writes the displayed
+values, the column ranks and the mean rank into `results/main_table.csv`.  In the
+reported runs two columns contain a displayed tie (base and CausalEPP, NDCG@20 on
+VG / SimGCL and Movies / SimGCL).
+
+The displayed-value rule concerns the mean rank only.  Relative improvements, the paired
+tests, and hyperparameter / checkpoint selection use the unrounded records.
 
 ## Coverage and exposure Gini
 
@@ -59,12 +67,11 @@ convention.  Lower nALRP does not imply broader coverage or lower Gini.
 | Table 2 (training vs recommendation popularity) | `results/train_vs_rec_popularity.csv` | `python analysis/train_vs_rec_popularity.py` |
 | Table 3, Figure 2 (datasets, split) | `results/dataset_table.csv`, `results/split_blocks.csv`, `figures/split_blocks.pdf` | `python analysis/dataset_stats.py`, `python analysis/plot_split.py` |
 | Tables 4-5 (accuracy), 6-7 (nALRP), Figure 3 | `results/main_table.csv`, `results/summary.csv`, `figures/pareto_recall_nalrp.pdf` | `bash scripts/run_main.sh`, `python analysis/collect_results.py`, `python analysis/plot_pareto.py` |
-| Table 8 (Calib@20), Table E.1 (paired tests) | `results/per_user_calib.csv`, `results/per_user_tests.csv` | `python analysis/per_user_tests.py` |
+| Table 8 (Calib@20 of STFR, PDA, TIDE, base), Table A.1 (paired accuracy tests) | `results/calib_table.csv`, `results/calib_per_seed.csv`, `results/per_user_tests.csv` | `python analysis/per_user_tests.py` |
 | Tables 9-11 (components, recency window N, sampler swaps) | `results/ablation_components.csv`, `results/ablation_recency.csv`, `results/ablation_samplers.csv` | `bash scripts/run_ablations_vg.sh`, `python analysis/ablation_tables.py` |
-| Section 7.4, Figure 4, Table E.3 (block configurations) | `results/block_configurations.csv`, `figures/block_configurations.pdf` | `bash scripts/run_block_configs.sh`, `python analysis/block_config_table.py`, `python analysis/plot_block_configs.py` |
+| Section 7.4, Figure 4 (block configurations, @20) | `results/block_configurations.csv`, `figures/block_configurations.pdf` | `bash scripts/run_block_configs.sh`, `python analysis/block_config_table.py`, `python analysis/plot_block_configs.py` |
 | Section 7.5, Tables 12-13 (embedding geometry) | `results/embedding_geometry.csv` | `python analysis/embedding_geometry.py` |
-| Table E.2 (serving interventions) | `results/serving_interventions.csv` | `python analysis/serving_interventions.py` |
-| Table E.4 (coverage, exposure Gini at @20) | `results/coverage_gini.csv`, `results/exposure_summary_k20.csv` | `python analysis/coverage_gini.py` |
+| Table A.2 (coverage, exposure Gini at @20: base, PDA, TIDE, STFR) | `results/exposure_summary_k20.csv`; every method with seed standard deviations: `results/coverage_gini.csv`, `results/coverage_gini_per_seed.csv` | `python analysis/coverage_gini.py` |
 
 Geometry: cos_pop is the mean cosine over 4,000 random pairs of items in the top 1% by
 cumulative count, nrm_ratio the ratio of that group's median norm to the catalog's
@@ -72,15 +79,17 @@ median norm.  Item embeddings are the representation the serving score uses: MF 
 learned item table; LightGCN the mean of layers 0..3 (layer 0 = the learned table
 before propagation, layer l = l graph propagations over the training graph); SimGCL
 the mean of layers 1..3, as in its reference encoder, without training-time noise.
-This is the default of `analysis/embedding_geometry.py` (`--simgcl_include_layer0` is a
-legacy option and not the manuscript's convention).  The interventions (norm removal,
-direction removal) re-rank test users with the same serving representation of base
-checkpoints, and the cos_pop / nrm_ratio columns of Table E.2 are computed on that
-same representation.
+`analysis/embedding_geometry.py` rebuilds this representation from the saved checkpoint
+and the training graph.
 
-Per-user accuracy in `analysis/per_user_tests.py` is computed from the saved top-K lists
-(`--from_ranks` uses the rank dump instead; the two differ only when tied scores fall on
-the cutoff boundary).
+Per-user accuracy (Table A.1), Calib@20 (Table 8), coverage and exposure Gini (Table A.2)
+are computed from the saved top-20 lists and targets (`test_recs_k20.txt`).  A missing
+list dump, or a stored list shorter than the requested cutoff, stops the script; the rank
+dump (`test_ranks.npz`, 1 + the number of items scored strictly higher than the target)
+is an optional raw output and no table is computed from it, because targets with tied
+scores share a rank there while a list gives them distinct positions.
 
 All analysis scripts read the run layout of `scripts/run_cell.py` (`--runs runs`) and
-write to `results/` (`--out`); none of them trains or re-evaluates a model.
+write to `results/` (`--out`).  None of them trains a model or ranks users again:
+tables are aggregated from the saved test metrics and list dumps, and the geometry
+script only reads the saved checkpoints.

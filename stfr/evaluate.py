@@ -182,10 +182,10 @@ class Evaluator:
                     ranks_u.append(np.full(tg.size, int(u), dtype=np.int64))
                     ranks_i.append(tg)
                     ranks_r.append(rk.astype(np.int32))
-            topk_idx = np.argpartition(-rate_batch, k - 1, axis=1)[:, :k]
-            pop_sum += float(self.d[topk_idx].sum())
-            pop_cnt += int(topk_idx.size)
+            # one top-K set per user for accuracy, nALRP and the list dump
             pred = np.argpartition(rate_batch, -k)[:, -k:]
+            pop_sum += float(self.d[pred].sum())
+            pop_cnt += int(pred.size)
             for r, u in enumerate(ub):
                 top = pred[r, np.argsort(rate_batch[r, pred[r]])][::-1].astype(int)
                 targets = self.targets[int(u)]

@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Block-configuration figure (Figure 4) from results/block_configurations.csv.
 
-  python analysis/plot_block_configs.py [--results results] [--out figures]
+  python analysis/plot_block_configs.py [--results results] [--out figures] [--k 20]
+
+The manuscript's figure uses @20, the cutoff written by analysis/block_config_table.py.
 """
 import argparse
 import os
@@ -17,11 +19,18 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument('--results', default='results')
     p.add_argument('--out', default='figures')
-    p.add_argument('--k', type=int, default=50)
+    p.add_argument('--k', type=int, default=20)
     a = p.parse_args()
     os.makedirs(a.out, exist_ok=True)
-    d = pd.read_csv(os.path.join(a.results, 'block_configurations.csv'))
+    src = os.path.join(a.results, 'block_configurations.csv')
+    if not os.path.exists(src):
+        raise SystemExit('%s not found: run python analysis/block_config_table.py first' % src)
+    d = pd.read_csv(src)
+    have = sorted(d.k.unique().tolist())
     d = d[(d.k == a.k) & (d.method == 'STFR')]
+    if d.empty or not {'recall_gain_pct', 'nalrp_diff'} <= set(d.columns) or d['recall_gain_pct'].isna().all():
+        raise SystemExit('%s has no STFR-vs-base rows at @%d (cutoffs in the file: %s); '
+                         'both base and STFR finals are needed per configuration' % (src, a.k, have))
     Ls = sorted(d.L_days.unique())
     bbs = [b for b in ('MF', 'LightGCN', 'SimGCL') if b in d.backbone.values]
     plt.rcParams.update({'pdf.fonttype': 42, 'font.size': 10, 'axes.spines.top': False, 'axes.spines.right': False})

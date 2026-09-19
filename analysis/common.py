@@ -13,6 +13,9 @@ CELL_ORDER = [('Amazon-VG', 'MF'), ('Amazon-VG', 'LightGCN'), ('Amazon-VG', 'Sim
               ('Amazon-Movies', 'MF'), ('Amazon-Movies', 'LightGCN'), ('Amazon-Movies', 'SimGCL'),
               ('Douban-movie', 'MF'), ('Douban-movie', 'LightGCN')]
 EPS = 1e-12
+SEEDS = (20, 21, 22)
+DISPLAY_DECIMALS = 4                     # accuracy columns of Tables 4-5
+RANK_COLUMNS = {'MF': 6, 'LightGCN': 6, 'SimGCL': 4}   # accuracy columns entering the mean rank
 
 
 def read_json(path):
@@ -34,6 +37,12 @@ def final_runs(runs_root, data=None, backbone=None):
     return out
 
 
+def main_runs(runs_root):
+    """Final runs of the eight main settings (CELL_ORDER).  The block-configuration variants
+    (data Amazon-VG_b<L>) share the run layout and are read by block_config_table.py only."""
+    return [a for a in final_runs(runs_root) if (a['data'], a['backbone']) in CELL_ORDER]
+
+
 def test_metrics(run_dir, k):
     p = os.path.join(run_dir, 'test_k%d.json' % k)
     return read_json(p) if os.path.exists(p) else None
@@ -47,7 +56,7 @@ def val_best(run_dir):
 def long_table(runs_root):
     """One row per final run x cutoff: data, backbone, arm, method, seed, k, recall, ndcg, nalrp."""
     rows = []
-    for a in final_runs(runs_root):
+    for a in main_runs(runs_root):
         for k in (20,):
             m = test_metrics(a['run_dir'], k)
             if m is None:
@@ -69,6 +78,46 @@ def summarize(df):
     return s
 
 
+def display(v, decimals=DISPLAY_DECIMALS):
+    """Printed form of a table value.  The tables and the rank keys both use this string, so
+    a rank never distinguishes two values that the table shows as equal."""
+    return '%.*f' % (decimals, float(v))
+
+
+def display_ranks(table, value_cols, group_cols, arm_col='arm', backbone_col='backbone'):
+    """Column ranks and mean rank on the displayed values (Tables 4-5).
+
+    `table` holds one row per setting x method with the unrounded three-seed means in
+    `value_cols`.  Every column is ranked within its setting on display(mean) (rank 1 =
+    highest; equal displayed values share the average rank), and the mean rank of a method
+    on a backbone averages its column ranks over the backbone's settings.  Seed values are
+    never rounded before averaging.  Returns (table with disp_/rank_ columns, mean ranks)."""
+    t = table.copy()
+    for c in value_cols:
+        t['disp_' + c] = t[c].map(display)
+        t['rank_' + c] = t.groupby(group_cols, sort=False)['disp_' + c].transform(
+            lambda v: v.astype(float).rank(ascending=False, method='average'))
+    rank_cols = ['rank_' + c for c in value_cols]
+    g = t.groupby([backbone_col, arm_col], observed=True, sort=False)[rank_cols]
+    mr = pd.DataFrame(dict(mean_rank=g.sum().sum(axis=1) / g.count().sum(axis=1),
+                           mean_rank_n_cols=g.count().sum(axis=1))).reset_index()
+    return t, mr
+
+
+def check_records(df, arm_col='arm', arms=None, seeds=SEEDS, keys=('data', 'backbone')):
+    """Missing / duplicated seeds and missing methods of a per-seed table, as a list of messages."""
+    arms = list(arms or MAIN_ARMS)
+    msgs = []
+    for key, g in df.groupby(list(keys), sort=False):
+        for arm in arms:
+            sd = sorted(g[g[arm_col] == arm]['seed'].tolist())
+            if not sd:
+                msgs.append('%s: method %s is missing' % ('/'.join(map(str, key)), arm))
+            elif sd != sorted(seeds):
+                msgs.append('%s: %s has seeds %s (expected %s)' % ('/'.join(map(str, key)), arm, sd, list(seeds)))
+    return msgs
+
+
 def stale_signal(data_name):
     """(d_i, c_i, item_num, training-active mask) of a data directory."""
     dp = os.path.join(ROOT, 'data', data_name)
@@ -80,50 +129,42 @@ def stale_signal(data_name):
     return d, c, n, c > 0
 
 
-def read_recs(run_dir, k, split='test', source_k=20):
-    """[(user, top-k list, targets)] from the top-<source_k> list dump (first k entries)."""
-    p = os.path.join(run_dir, '%s_recs_k%d.txt' % (split, source_k))
+def list_dump_path(run_dir, split='test', source_k=20):
+    return os.path.join(run_dir, '%s_recs_k%d.txt' % (split, source_k))
+
+
+def read_recs(run_dir, k, split='test', source_k=20, required=False):
+    """[(user, top-k list, targets)] from the top-<source_k> list dump (first k entries).
+
+    Returns None when the dump does not exist (SystemExit with the command that writes it
+    when `required`).  A stored list shorter than k is an error: it is never used as a
+    top-k list."""
+    p = list_dump_path(run_dir, split, source_k)
     if not os.path.exists(p):
+        if required:
+            raise SystemExit('missing top-%d list dump: %s\n  write it from the saved checkpoint with\n'
+                             '  python -m stfr.eval_ckpt --run_dir %s --split %s --topk %d --dump_recs'
+                             % (source_k, p, run_dir, split, source_k))
         return None
+    if k > source_k:
+        raise ValueError('top-%d lists cannot be read from a top-%d dump' % (k, source_k))
     out = []
     with open(p) as f:
         for line in f:
             u, recs, gt = line.rstrip('\n').split('\t')
-            r = [int(x) for x in recs.split()][:k]
+            r = [int(x) for x in recs.split()]
             g = [int(x) for x in gt.split()]
-            if r and g:
-                out.append((int(u), r, g))
+            if len(r) < k:
+                raise SystemExit('%s: user %s has %d stored items (< %d); re-run eval_ckpt with --topk %d --dump_recs'
+                                 % (p, u, len(r), k, source_k))
+            if g:
+                out.append((int(u), r[:k], g))
     return out
 
 
-def per_user_from_ranks(run_dir, k, split='test'):
-    """{user: (recall@k, ndcg@k)} from the rank dump (rank of every target item)."""
-    p = os.path.join(run_dir, '%s_ranks.npz' % split)
-    if not os.path.exists(p):
-        return None
-    z = np.load(p)
-    users, ranks = z['user'], z['rank'].astype(np.int64)
-    order = np.argsort(users, kind='stable')
-    users, ranks = users[order], ranks[order]
-    out = {}
-    starts = np.flatnonzero(np.r_[True, users[1:] != users[:-1]])
-    ends = np.r_[starts[1:], len(users)]
-    log2inv = 1.0 / np.log2(np.arange(2, k + 2))
-    idcg_cum = np.cumsum(log2inv)
-    for s, e in zip(starts, ends):
-        rs = ranks[s:e]
-        n = len(rs)
-        hits = rs[rs <= k]
-        rec = len(hits) / n
-        dcg = float(log2inv[hits - 1].sum())
-        ndcg = dcg / idcg_cum[min(n, k) - 1]
-        out[int(users[s])] = (rec, ndcg)
-    return out
-
-
-def per_user_from_lists(run_dir, k, split='test'):
+def per_user_from_lists(run_dir, k, split='test', required=False):
     """{user: (recall@k, ndcg@k)} from the saved top-K lists (first k entries of the list dump)."""
-    recs = read_recs(run_dir, k, split)
+    recs = read_recs(run_dir, k, split, required=required)
     if recs is None:
         return None
     log2inv = 1.0 / np.log2(np.arange(2, k + 2))
@@ -135,12 +176,6 @@ def per_user_from_lists(run_dir, k, split='test'):
         dcg = float(log2inv[hits].sum()) if hits else 0.0
         out[u] = (len(hits) / len(g), dcg / idcg_cum[min(len(g), len(rr)) - 1])
     return out
-
-
-def per_user_accuracy(run_dir, k, split='test'):
-    """Per-user Recall@k / NDCG@k from the list dump, falling back to the rank dump."""
-    out = per_user_from_lists(run_dir, k, split)
-    return out if out is not None else per_user_from_ranks(run_dir, k, split)
 
 
 def seed_average(per_seed):

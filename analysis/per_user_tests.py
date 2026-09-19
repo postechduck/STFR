@@ -1,17 +1,21 @@
 #!/usr/bin/env python3
-"""Paired user-level comparisons of STFR with its strongest baseline (Table 8; Table E.1).
+"""Paired accuracy tests (Table A.1) and the mean-popularity gap Calib@20 (Table 8).
 
   python analysis/per_user_tests.py [--runs runs] [--out results] [--focal STFR]
 
-Accuracy (per_user_tests.csv): for every setting and metric (Recall@20, NDCG@20),
-the opponent is the compared method with the highest test mean.  Each user's metric is
-computed from the saved top-K lists (the rank dump is used when no list dump exists),
-averaged over the three seeds (users present in every seed), and compared with a
-two-sided paired t-test (Wilcoxon signed-rank p also reported).
+Both tables are computed from the saved top-20 lists and targets of the three final runs
+of every method (<run>/test_recs_k20.txt, written by eval_ckpt --dump_recs).  A missing
+list dump stops the script with the command that writes it; nothing is substituted.
 
-Mean-popularity gap and nALRP (per_user_calib.csv): Calib@20 = |mean d(top-20) - mean d(targets)|
-and nALRP@20 per user from the saved top-K lists, opponent = strongest Recall@20 baseline;
-positive deltas favour the focal method (lower is better for both).
+Table A.1 (per_user_tests.csv): for every setting and metric (Recall@20, NDCG@20) the
+opponent is the compared method with the highest test mean of that metric.  Each user's
+metric is averaged over the three seeds (users present in every seed) and compared with a
+two-sided paired t-test (Wilcoxon signed-rank p also written).  Unrounded per-user values;
+no multiple-comparison adjustment.
+
+Table 8 (calib_table.csv, calib_per_seed.csv): Calib@20(u) = |mean d(top-20) - mean d(targets)|
+averaged over users within a seed and then over the three seeds, for STFR, PDA, TIDE and
+base in every setting.  The per-seed file also holds the other compared methods.
 """
 import argparse
 import os
@@ -20,7 +24,9 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-from common import final_runs, test_metrics, per_user_accuracy, per_user_from_ranks, read_recs, seed_average, stale_signal, BASELINES
+from common import main_runs, test_metrics, per_user_from_lists, read_recs, seed_average, stale_signal, display, BASELINES, CELL_ORDER, SEEDS
+
+CALIB_ARMS = ['STFR', 'PDA', 'TIDE', 'base']
 
 
 def paired(a, b, lower_better=False):
@@ -43,12 +49,11 @@ def main():
     p.add_argument('--runs', default='runs')
     p.add_argument('--out', default='results')
     p.add_argument('--focal', default='STFR')
-    p.add_argument('--from_ranks', action='store_true',
-                   help='per-user accuracy from the rank dumps instead of the saved lists (differs only in ties)')
     a = p.parse_args()
     os.makedirs(a.out, exist_ok=True)
-    runs = final_runs(a.runs)
+    runs = main_runs(a.runs)
     cells = sorted({(r['data'], r['backbone']) for r in runs})
+    cells.sort(key=lambda c: CELL_ORDER.index(c) if c in CELL_ORDER else len(CELL_ORDER))
     acc_rows, cal_rows = [], []
     for data, bb in cells:
         cell = [r for r in runs if r['data'] == data and r['backbone'] == bb]
@@ -69,13 +74,10 @@ def main():
 
         def per_user(arm, k):
             if (arm, k) not in pu_cache:
-                fn = per_user_from_ranks if a.from_ranks else per_user_accuracy
-                ds = [fn(r['run_dir'], k) for r in sorted(arms[arm], key=lambda r: r['seed'])]
-                if any(d is None for d in ds):
-                    pu_cache[(arm, k)] = None
-                else:
-                    pu_cache[(arm, k)] = (seed_average([{u: v[0] for u, v in d.items()} for d in ds]),
-                                          seed_average([{u: v[1] for u, v in d.items()} for d in ds]))
+                ds = [per_user_from_lists(r['run_dir'], k, required=True)
+                      for r in sorted(arms[arm], key=lambda r: r['seed'])]
+                pu_cache[(arm, k)] = (seed_average([{u: v[0] for u, v in d.items()} for d in ds]),
+                                      seed_average([{u: v[1] for u, v in d.items()} for d in ds]))
             return pu_cache[(arm, k)]
 
         for k in (20,):
@@ -85,31 +87,18 @@ def main():
                     continue
                 opp = max(cands)[1]
                 f, o = per_user(a.focal, k), per_user(opp, k)
-                if f is None or o is None:
-                    continue
                 res = paired(f[mi], o[mi])
                 acc_rows.append(dict(data=data, backbone=bb, metric='%s@%d' % (metric, k), opponent=opp, **res))
-        # Calib@20 / nALRP@20 from the saved lists, opponent = strongest Recall@20 baseline
-        cands = [(mean[(b, 20)]['recall'], b) for b in rivals if (b, 20) in mean]
-        if cands:
-            opp = max(cands)[1]
-            d, _, n, _ = stale_signal(data)
-
-            def lists(arm):
-                per = []
-                for r in sorted(arms[arm], key=lambda r: r['seed']):
-                    recs = read_recs(r['run_dir'], 20)
-                    if recs is None:
-                        return None
-                    per.append({u: (float(d[rr].mean()), abs(float(d[rr].mean()) - float(d[g].mean())))
-                                for u, rr, g in recs})
-                return (seed_average([{u: v[0] for u, v in p.items()} for p in per]),
-                        seed_average([{u: v[1] for u, v in p.items()} for p in per]))
-            f, o = lists(a.focal), lists(opp)
-            if f is not None and o is not None:
-                for i, name in enumerate(('nalrp@20', 'calib@20')):
-                    cal_rows.append(dict(data=data, backbone=bb, metric=name, opponent=opp,
-                                         **paired(f[i], o[i], lower_better=True)))
+        # Table 8: Calib@20 per seed (user mean) for every method of the setting
+        d = stale_signal(data)[0]
+        for arm, rs in arms.items():
+            for r in rs:
+                recs = read_recs(r['run_dir'], 20, required=arm in CALIB_ARMS)
+                if recs is None:
+                    continue
+                gap = [abs(float(d[rr].mean()) - float(d[g].mean())) for _, rr, g in recs]
+                cal_rows.append(dict(data=data, backbone=bb, arm=arm, seed=r['seed'], n_users=len(gap),
+                                     calib20=float(np.mean(gap))))
         print('[done] %s/%s' % (data, bb), flush=True)
 
     pd.set_option('display.width', 220)
@@ -121,11 +110,17 @@ def main():
               .to_string(index=False, float_format=lambda v: '%.5f' % v))
     if cal_rows:
         cal = pd.DataFrame(cal_rows)
-        cal.to_csv(os.path.join(a.out, 'per_user_calib.csv'), index=False)
-        print('\n== nALRP@20 / Calib@20 (lower is better; delta = focal - opponent) ==')
-        print(cal[['data', 'backbone', 'metric', 'opponent', 'n', 'focal_mean', 'opponent_mean', 'delta', 'focal_win_frac', 'p_t']]
-              .to_string(index=False, float_format=lambda v: '%.4f' % v))
-    print('\n[per-user tests] -> %s/per_user_tests.csv, per_user_calib.csv' % a.out)
+        cal.to_csv(os.path.join(a.out, 'calib_per_seed.csv'), index=False)
+        for (data, bb, arm), g in cal[cal.arm.isin(CALIB_ARMS)].groupby(['data', 'backbone', 'arm']):
+            if sorted(g.seed) != sorted(SEEDS):
+                print('[check] %s/%s %s: Calib over seeds %s (expected %s)' % (data, bb, arm, sorted(g.seed), list(SEEDS)))
+        tab = cal[cal.arm.isin(CALIB_ARMS)].pivot_table(index=['data', 'backbone'], columns='arm', values='calib20',
+                                                        aggfunc='mean', sort=False)
+        tab = tab[[c for c in CALIB_ARMS if c in tab.columns]]
+        tab.reset_index().to_csv(os.path.join(a.out, 'calib_table.csv'), index=False)
+        print('\n== Table 8: Calib@20 (user mean per seed, three-seed mean; lower is better) ==')
+        print(tab.map(lambda v: display(v, 3)).to_string())
+    print('\n[per-user tests] -> %s/per_user_tests.csv (Table A.1), calib_table.csv, calib_per_seed.csv (Table 8)' % a.out)
 
 
 if __name__ == '__main__':

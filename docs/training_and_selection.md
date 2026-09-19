@@ -33,9 +33,11 @@ runs/<data>/<backbone>/final/<arm>_<config>_s<seed>/
 runs/<data>/<backbone>/selection.json, lambda.json, summary.csv
 ```
 
-`test_ranks.npz` stores the rank of every target item; `test_recs_k20.txt` stores each
-user's top-20 list and targets (per-user accuracy, Calib, coverage, exposure Gini, nALRP
-recomputation).
+`test_recs_k20.txt` stores each user's top-20 list and targets; per-user accuracy, Calib,
+coverage and exposure Gini are computed from it, and a final run whose list dump is
+missing is evaluated again from its checkpoint when `run_cell.py` is re-run.
+`test_ranks.npz` (strict rank of every target item) is an optional raw output that no table
+reads.  Accuracy, nALRP and the list dump of one evaluation use the same top-K set.
 
 ## Single runs
 
@@ -52,10 +54,11 @@ backbone-specific defaults of `stfr/config.py`.
 
 ## Statistical reporting
 
-`analysis/per_user_tests.py` averages each user's metric over the three seeds (users
-evaluated in every seed) and compares STFR with the compared method that has the
-highest test mean for the metric and cutoff at hand, using an unadjusted two-sided
-paired t-test (Wilcoxon signed-rank p-values are also written).  The opponent choice is
+`analysis/per_user_tests.py` computes each user's metric from the saved top-20 lists,
+averages it over the three seeds (users evaluated in every seed) and compares STFR with
+the compared method that has the highest test mean for the metric at hand, using an
+unadjusted two-sided paired t-test on the unrounded per-user values (Wilcoxon signed-rank
+p-values are also written).  The opponent choice is
 descriptive and separate from validation-based selection.  Non-significance does not
 establish equivalence.
 

@@ -118,8 +118,14 @@ class Cell:
         return os.path.exists(os.path.join(run_dir, 'metrics.json'))
 
     @staticmethod
-    def eval_done(run_dir, split, k):
-        return os.path.exists(os.path.join(run_dir, '%s_k%d.json' % (split, k)))
+    def eval_done(run_dir, split, k, dumps=False):
+        """Metrics written and, for a run evaluated with dumps, its non-empty top-K list dump."""
+        if not os.path.exists(os.path.join(run_dir, '%s_k%d.json' % (split, k))):
+            return False
+        if dumps:
+            p = os.path.join(run_dir, '%s_recs_k%d.txt' % (split, k))
+            return os.path.exists(p) and os.path.getsize(p) > 0
+        return True
 
     def run_stage(self, name, jobs):
         """jobs: list of (label, [cmd, ...]); each job runs its commands sequentially."""
@@ -389,7 +395,8 @@ class Cell:
         jobs = []
         for arm, seed, rd in self.final_dirs():
             cmds = []
-            if not self.eval_done(rd, 'test', 20):
+            # a run with metrics but no list dump is evaluated again from its saved checkpoint
+            if not self.eval_done(rd, 'test', 20, dumps=True):
                 cmds.append(self.eval_cmd(rd, 'test', 20, dumps=True))
             if cmds:
                 jobs.append(('test %s s%d' % (arm, seed), cmds))

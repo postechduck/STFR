@@ -3,8 +3,17 @@
 
   python analysis/dataset_stats.py [--datasets Amazon-VG,Amazon-Movies,Douban-movie] [--out results]
 
-Reads data/<dataset>/ (written by prep/prep_split.py).  Window rows before the target
-filters are recomputed from data_raw/<dataset>/raw_interactions.csv when present.
+Reads data/<dataset>/ (written by prep/prep_split.py) and, for the Figure 2 rows of the
+evaluation halves and of the blocks after the evaluation block, the full interaction
+file data_raw/<dataset>/raw_interactions.csv:
+
+  role val / test   n_interactions = evaluation targets, n_rows_prefilter = interactions of
+                    the window before the user / item target filters (the height drawn)
+  role after_eval   60-day blocks after the evaluation block.  They are counted for the
+                    figure only; training, model selection and evaluation never read them.
+
+Without the full interaction file these counts cannot be computed: the rows are written
+with empty n_rows_prefilter and no after_eval rows, and plot_split.py refuses to draw.
 """
 import argparse
 import json
@@ -51,21 +60,34 @@ def main():
                                n_interactions=int(cnt[k]), n_rows_prefilter=int(cnt[k]), role='train'))
         raw = os.path.join(ROOT, 'data_raw', ds, 'raw_interactions.csv')
         val_cut = m.get('val_cut', at[t_star] - W + m['val_days'] * DAY)
-        vraw, traw = len(va), len(te)
+        vraw = traw = None
+        after = []
         if os.path.exists(raw):
             full = pd.read_csv(raw, sep='\t', usecols=['user', 'item', 'timestamp'])
             full['timestamp'] = full['timestamp'].astype(np.int64)
             if m.get('dedupe', True):
                 full = full.sort_values('timestamp', kind='stable').drop_duplicates(['user', 'item'], keep='first')
-            win = full[(full.timestamp > at[t_star] - W) & (full.timestamp <= at[t_star])]
-            vraw = int((win.timestamp < val_cut).sum())
-            traw = int((win.timestamp >= val_cut).sum())
+            ts = full.timestamp.values
+            win = ts[(ts > at[t_star] - W) & (ts <= at[t_star])]
+            vraw = int((win < val_cut).sum())
+            traw = int((win >= val_cut).sum())
+            k, edge = t_star + 1, int(at[t_star])
+            while edge < ts.max():
+                after.append((k, edge, int(((ts > edge) & (ts <= edge + W)).sum())))
+                k, edge = k + 1, edge + W
+        else:
+            print('[dataset stats] %s: %s not found -- pre-filter window counts and the blocks after the '
+                  'evaluation block are left empty (Figure 2 needs them)' % (ds, raw))
         blocks.append(dict(dataset=ds, block_index=t_star, block_start_date=date(at[t_star] - W), block_end_date=date(val_cut - 1),
                            n_interactions=len(va), n_rows_prefilter=vraw, role='val'))
         blocks.append(dict(dataset=ds, block_index=t_star, block_start_date=date(val_cut), block_end_date=date(at[t_star] - 1),
                            n_interactions=len(te), n_rows_prefilter=traw, role='test'))
+        for k, edge, n in after:
+            blocks.append(dict(dataset=ds, block_index=k, block_start_date=date(edge), block_end_date=date(edge + W - 1),
+                               n_interactions=n, n_rows_prefilter=n, role='after_eval'))
     T = pd.DataFrame(rows)
     B = pd.DataFrame(blocks)
+    B['n_rows_prefilter'] = B['n_rows_prefilter'].astype('Int64')
     T.to_csv(os.path.join(a.out, 'dataset_table.csv'), index=False)
     B.to_csv(os.path.join(a.out, 'split_blocks.csv'), index=False)
     pd.set_option('display.width', 200)

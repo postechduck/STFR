@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Section 7.4 (Figure 4, Table E.3): temporal block configurations on Amazon-VG, L in {15, 30, 120} days
+# Section 7.4 (Figure 4): temporal block configurations on Amazon-VG, L in {15, 30, 120} days
 # (L = 60 is the main comparison).  Every configuration keeps the same training
 # interactions and the same evaluation-block start (--eval_block = 5520 / L, since the
 # main split's evaluation block starts 5520 days after the first interaction); the

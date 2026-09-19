@@ -4,18 +4,14 @@
   python analysis/embedding_geometry.py [--runs runs] [--out results] [--arms base,PDA,TIDE,STFR]
 
 For every final checkpoint: cos_pop = mean pairwise cosine over 4,000 random pairs of
-items in the top 1% by cumulative training count (cos_rand: pairs from the whole
-catalog); nrm_ratio = median norm of that group / median norm of the catalog;
-r_dir = correlation between log(1 + c_i) and the projection of the unit vector on the
-group's mean direction; r_nrm = correlation between log(1 + c_i) and the norm.
+items in the top 1% by cumulative training count; nrm_ratio = median norm of that group /
+median norm of the catalog.
 
-Item embeddings are the ones the serving score uses (the manuscript's convention):
-MF the learned item table; LightGCN the mean of layers 0..3 (layer 0 = the learned
-table before propagation, layer l = l graph propagations); SimGCL the mean of layers
-1..3, as in its reference encoder.  Graph embeddings are reconstructed from the
-training graph without SimGCL's training-time noise.  --simgcl_include_layer0 is a
-legacy option (mean of layers 0..3 for SimGCL as well) that is NOT the manuscript's
-convention.
+Item embeddings are the ones the serving score uses: MF the learned item table; LightGCN
+the mean of layers 0..3 (layer 0 = the learned table before propagation, layer l = l graph
+propagations); SimGCL the mean of layers 1..3, as in its reference encoder.  Graph
+embeddings are rebuilt from the saved checkpoint and the training graph without SimGCL's
+training-time noise; no model is trained or re-evaluated.
 """
 import argparse
 import json
@@ -26,7 +22,7 @@ import pandas as pd
 import scipy.sparse as sp
 import torch
 
-from common import final_runs, ROOT
+from common import main_runs, ROOT
 
 N_LAYERS = 3
 
@@ -79,12 +75,7 @@ def geometry(E, counts, seed=0):
         keep = (a != b).any(1)
         return float((a[keep] * b[keep]).sum(1).mean())
 
-    v = Eh[top].mean(0)
-    v /= np.linalg.norm(v) + 1e-12
-    return dict(cos_pop=pair_cos(top), cos_rand=pair_cos(np.arange(n)),
-                r_dir=float(np.corrcoef(np.log1p(counts), Eh @ v)[0, 1]),
-                r_nrm=float(np.corrcoef(np.log1p(counts), nrm)[0, 1]),
-                nrm_ratio=float(np.median(nrm[top]) / np.median(nrm)))
+    return dict(cos_pop=pair_cos(top), nrm_ratio=float(np.median(nrm[top]) / np.median(nrm)))
 
 
 def main():
@@ -92,14 +83,12 @@ def main():
     p.add_argument('--runs', default='runs')
     p.add_argument('--out', default='results')
     p.add_argument('--arms', default='base,PDA,TIDE,STFR')
-    p.add_argument('--simgcl_include_layer0', action='store_true',
-                   help='legacy: average layers 0..3 for SimGCL too (not the manuscript convention)')
     a = p.parse_args()
     os.makedirs(a.out, exist_ok=True)
     arms = a.arms.split(',')
     rows = []
     graphs, meta = {}, {}
-    for r in final_runs(a.runs):
+    for r in main_runs(a.runs):
         if r['arm'] not in arms:
             continue
         ck = os.path.join(r['run_dir'], 'best.pth')
@@ -118,7 +107,7 @@ def main():
                 graphs[data] = build_graph(data, n_user, n_item)
             Ah = graphs[data]
         sd = torch.load(ck, map_location='cpu')
-        include_ego = (r['backbone'] != 'SimGCL') or a.simgcl_include_layer0
+        include_ego = r['backbone'] != 'SimGCL'   # SimGCL serves the mean of layers 1..3
         _, E = embeddings(sd, r['backbone'], n_user, Ah, include_ego)
         rows.append(dict(data=data, backbone=r['backbone'], arm=r['arm'], seed=r['seed'], **geometry(E, counts)))
         print('[done] %s/%s %s s%d' % (data, r['backbone'], r['arm'], r['seed']), flush=True)
@@ -127,8 +116,7 @@ def main():
         raise SystemExit('no checkpoints found')
     df.to_csv(os.path.join(a.out, 'embedding_geometry_per_seed.csv'), index=False)
     s = df.groupby(['data', 'backbone', 'arm'], sort=False).agg(
-        n=('seed', 'count'), cos_pop=('cos_pop', 'mean'), cos_rand=('cos_rand', 'mean'),
-        nrm_ratio=('nrm_ratio', 'mean'), r_dir=('r_dir', 'mean'), r_nrm=('r_nrm', 'mean')).reset_index()
+        n=('seed', 'count'), cos_pop=('cos_pop', 'mean'), nrm_ratio=('nrm_ratio', 'mean')).reset_index()
     s.to_csv(os.path.join(a.out, 'embedding_geometry.csv'), index=False)
     pd.set_option('display.width', 200)
     print(s.to_string(index=False, float_format=lambda v: '%.3f' % v))

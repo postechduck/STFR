@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Section 7.4 (Figure 4, Table E.3): base vs STFR across temporal block configurations on Amazon-VG.
+"""Section 7.4 (Figure 4): base vs STFR across temporal block configurations on Amazon-VG.
 
   python analysis/block_config_table.py [--runs runs] [--out results]
 

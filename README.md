@@ -29,7 +29,8 @@ The sampler uses raw counts raised to a power, not the normalized log-popularity
 signal.  Negatives exclude the user's training history: a count-weighted draw that
 falls in that history falls back to the uniform candidate (this is not repeated
 rejection sampling from the weighted component; see
-[docs/implementation.md](docs/implementation.md)).  The manuscript's simplified BPR
+[docs/implementation.md](docs/implementation.md)), and the uniform candidate itself is
+always outside the history.  The manuscript's simplified BPR
 analysis concerns a reduced model and is not a convergence or causal-debiasing
 guarantee for the full personalized system.
 
@@ -83,15 +84,19 @@ the repository root.
 ```bash
 # 1. raw interactions -> data_raw/<dataset>/raw_interactions.csv (user item rating timestamp, dense ids)
 python prep/adapters/douban.py --tsv data_raw/Douban/movie/douban_movie.tsv
-python prep/adapters/amazon.py --dataset Amazon-VG --src_files <dir>/train_data.csv <dir>/val_data.csv <dir>/test_data.csv
+python prep/adapters/amazon.py --dataset Amazon-VG --src_reviews Video_Games_5.json.gz        # Amazon Review Data (2018), 5-core reviews
+python prep/adapters/amazon.py --dataset Amazon-Movies --src_reviews Movies_and_TV.csv       # Amazon Review Data (2018), ratings only
 # 2. chronological split, masks, targets and popularity tables -> data/<dataset>/
 python prep/prep_split.py --dataset Amazon-VG
 python prep/prep_split.py --dataset Amazon-Movies
 python prep/prep_split.py --dataset Douban-movie
+# 3. compare with the manuscript's split (content digests in data/reference/checksums.json)
+python prep/verify_data.py --dataset Amazon-VG
 ```
 
-Sources, preprocessing, the split rule, target filtering and the exact split
-boundaries are documented in [docs/data_and_evaluation.md](docs/data_and_evaluation.md);
+Sources and versions, the preprocessing order, the dense-id mapping, the split rule,
+target filtering and the exact split boundaries are documented in
+[docs/data_and_evaluation.md](docs/data_and_evaluation.md);
 `data/reference/<dataset>.json` gives the expected metadata of each split.
 
 ## Quick start
@@ -113,8 +118,8 @@ python -m stfr.train --dataset Amazon-VG --backbone MF --method DDC --ddc_topk 0
 
 `python -m stfr.train --help` lists every argument.  A run directory contains
 `config.json`, `train.log`, `best.pth` (best validation checkpoint), `metrics.json`
-and, after `eval_ckpt`, `test_k<K>.json`, the rank dump and the top-K list dump used by
-the analysis scripts.
+and, after `eval_ckpt`, `test_k<K>.json` and the top-K list dump used by the analysis scripts
+(`--rank_dump` additionally writes the optional rank dump).
 
 ## Reproducing the manuscript
 
@@ -122,18 +127,31 @@ the analysis scripts.
 bash scripts/run_main.sh                                   # main comparison: search, three-seed finals, test (8 settings)
 SELECTED=configs/selected_paper.json bash scripts/run_main.sh   # same, skipping the search
 bash scripts/run_ablations_vg.sh                           # Section 7.3 controls on Amazon-VG (Tables 9-11)
-bash scripts/run_block_configs.sh                          # Section 7.4, Figure 4 and Table E.3: block configurations (L = 15, 30, 120 days)
-
-python analysis/collect_results.py                         # Tables 4-7 (results/main_table.csv; mean rank over the @20 accuracy columns)
-python analysis/ablation_tables.py                         # Tables 9-11 (components, recency window N, sampler swaps)
-python analysis/per_user_tests.py                          # Table 8 (Calib@20) and Table E.1 (paired tests)
-python analysis/embedding_geometry.py                      # Tables 12-13 (embedding geometry; serving representation by default)
-python analysis/serving_interventions.py                   # Table E.2 (serving interventions)
-python analysis/block_config_table.py                      # Table E.3 (block configurations)
-python analysis/coverage_gini.py                           # Table E.4 (coverage, exposure Gini at @20)
-python analysis/popularity_signals.py; python analysis/train_vs_rec_popularity.py; python analysis/dataset_stats.py   # Tables 1-3
-python analysis/plot_pareto.py; python analysis/plot_block_configs.py; python analysis/plot_split.py             # Figures 2, 3, 4
+bash scripts/run_block_configs.sh                          # Section 7.4 and Figure 4: block configurations (L = 15, 30, 120 days)
 ```
+
+Every table and figure is then computed from the saved outputs of those runs (metrics,
+top-20 list dumps, checkpoints); no analysis script trains a model.
+
+| Manuscript | Input | Command | Output (`results/`, `figures/`) |
+| --- | --- | --- | --- |
+| Table 1 | `data/<dataset>/` | `python analysis/popularity_signals.py` | `popularity_signals.csv` |
+| Table 2 | `data/<dataset>/`, `results/summary.csv` (run `collect_results.py` first) | `python analysis/train_vs_rec_popularity.py` | `train_vs_rec_popularity.csv` |
+| Table 3, Figure 2 | `data/<dataset>/`, `data_raw/<dataset>/raw_interactions.csv` | `python analysis/dataset_stats.py; python analysis/plot_split.py` | `dataset_table.csv`, `split_blocks.csv`, `split_blocks.pdf` |
+| Tables 4-5 (accuracy, mean rank), 6-7 (nALRP), Figure 3 | `runs/*/*/final/*/test_k20.json` | `python analysis/collect_results.py; python analysis/plot_pareto.py` | `main_table.csv`, `summary.csv`, `per_seed.csv`, `pareto_recall_nalrp.pdf` |
+| Table 8 (Calib@20 of STFR, PDA, TIDE, base), Table A.1 (paired accuracy tests) | `test_recs_k20.txt` of every final run | `python analysis/per_user_tests.py` | `calib_table.csv`, `calib_per_seed.csv`, `per_user_tests.csv` |
+| Tables 9-11 | finals of `scripts/run_ablations_vg.sh` | `python analysis/ablation_tables.py` | `ablation_components.csv`, `ablation_recency.csv`, `ablation_samplers.csv` |
+| Section 7.4, Figure 4 (@20) | finals of `scripts/run_block_configs.sh` | `python analysis/block_config_table.py; python analysis/plot_block_configs.py` | `block_configurations.csv`, `block_configurations.pdf` |
+| Tables 12-13 (embedding geometry) | `best.pth` of the base, PDA, TIDE and STFR finals | `python analysis/embedding_geometry.py` | `embedding_geometry.csv` |
+| Table A.2 (coverage, exposure Gini of base, PDA, TIDE, STFR; all methods in the csv) | `test_recs_k20.txt` of every final run | `python analysis/coverage_gini.py` | `exposure_summary_k20.csv`, `coverage_gini.csv`, `coverage_gini_per_seed.csv` |
+
+The per-user analyses read the saved top-20 lists only; a missing list dump stops the
+script with the `eval_ckpt` command that writes it from the saved checkpoint (and
+`scripts/run_cell.py` re-evaluates a final run whose list dump is missing).  Figure 2
+additionally needs the full interaction file `data_raw/<dataset>/raw_interactions.csv`
+for the pre-filter window counts and the blocks after the evaluation block, which are
+counted for that figure only.  The records of the manuscript's own runs and the scripts
+that re-aggregate them without any model are in [reproduction/](reproduction/README.md).
 
 `scripts/run_cell.py` implements the protocol for one dataset x backbone setting
 (SimGCL weight selection, validation search of every method with a 30-epoch cap,
@@ -161,11 +179,11 @@ STFR against the compared method with the highest mean Recall@20 in each setting
 | Douban / LightGCN | .1200 | .0756 | .699 | TIDE | .0786 | .0600 | .833 |
 
 Mean rank over the @20 accuracy columns (Recall@20 and NDCG@20 of the backbone's
-datasets, unrounded three-seed means, exact ties only): STFR 1.33 on MF, 1.00 on
-LightGCN, 1.25 on SimGCL.  STFR has the highest mean Recall@20 in seven of the eight
+datasets): ranks are computed from the displayed four-decimal three-seed mean values,
+with average ranks assigned to ties; STFR 1.33 on MF, 1.00 on LightGCN, 1.25 on SimGCL.  STFR has the highest mean Recall@20 in seven of the eight
 settings (Douban / MF: TIDE) and lower nALRP@20 than base, PDA and TIDE in all eight.
 Per-user paired tests, Calib@20, coverage and exposure Gini are produced by the analysis
-scripts listed above.  The three-seed records behind these numbers, the ranks, the
+scripts listed above.  Improvements, tests and model selection use the unrounded records.  The three-seed records behind these numbers, the ranks, the
 ablation / recency / sampler runs of Tables 9-11 and the selection sweeps are in
 [reproduction/](reproduction/README.md).
 
