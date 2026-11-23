@@ -1,0 +1,46 @@
+dataset,backbone,variant,seed,recall20,ndcg20,nalrp20
+Amazon-VG,MF,Unmodified backbone,20,0.04886,0.02475,0.69878
+Amazon-VG,MF,Unmodified backbone,21,0.05589,0.02607,0.73226
+Amazon-VG,MF,Unmodified backbone,22,0.05435,0.02601,0.67133
+Amazon-VG,MF,SSNS only,20,0.05563,0.02628,0.72494
+Amazon-VG,MF,SSNS only,21,0.05518,0.02630,0.67340
+Amazon-VG,MF,SSNS only,22,0.05504,0.02619,0.65498
+Amazon-VG,MF,Fresh channel only,20,0.10531,0.05086,0.70014
+Amazon-VG,MF,Fresh channel only,21,0.10582,0.04990,0.70289
+Amazon-VG,MF,Fresh channel only,22,0.10505,0.05130,0.70005
+Amazon-VG,MF,STFR (shared gain),20,0.10779,0.05288,0.66095
+Amazon-VG,MF,STFR (shared gain),21,0.10733,0.05261,0.66294
+Amazon-VG,MF,STFR (shared gain),22,0.11075,0.05312,0.65450
+Amazon-VG,MF,STFR,20,0.11053,0.05513,0.60183
+Amazon-VG,MF,STFR,21,0.10684,0.05070,0.61039
+Amazon-VG,MF,STFR,22,0.11334,0.05547,0.57252
+Amazon-VG,LightGCN,Unmodified backbone,20,0.06852,0.03108,0.77187
+Amazon-VG,LightGCN,Unmodified backbone,21,0.06776,0.03110,0.77254
+Amazon-VG,LightGCN,Unmodified backbone,22,0.06818,0.03098,0.77224
+Amazon-VG,LightGCN,SSNS only,20,0.07267,0.03536,0.69041
+Amazon-VG,LightGCN,SSNS only,21,0.07871,0.03693,0.68900
+Amazon-VG,LightGCN,SSNS only,22,0.07564,0.03691,0.69000
+Amazon-VG,LightGCN,Fresh channel only,20,0.10273,0.04826,0.75391
+Amazon-VG,LightGCN,Fresh channel only,21,0.10334,0.04857,0.75176
+Amazon-VG,LightGCN,Fresh channel only,22,0.10177,0.04696,0.75333
+Amazon-VG,LightGCN,STFR (shared gain),20,0.11185,0.05757,0.70426
+Amazon-VG,LightGCN,STFR (shared gain),21,0.11295,0.05700,0.70561
+Amazon-VG,LightGCN,STFR (shared gain),22,0.11266,0.05613,0.70688
+Amazon-VG,LightGCN,STFR,20,0.12682,0.06198,0.60746
+Amazon-VG,LightGCN,STFR,21,0.11807,0.06231,0.60671
+Amazon-VG,LightGCN,STFR,22,0.12003,0.06171,0.64325
+Amazon-VG,SimGCL,Unmodified backbone,20,0.07281,0.03513,0.72152
+Amazon-VG,SimGCL,Unmodified backbone,21,0.07623,0.03735,0.72239
+Amazon-VG,SimGCL,Unmodified backbone,22,0.07538,0.03585,0.71927
+Amazon-VG,SimGCL,SSNS only,20,0.07439,0.03607,0.71154
+Amazon-VG,SimGCL,SSNS only,21,0.07984,0.03844,0.71526
+Amazon-VG,SimGCL,SSNS only,22,0.07559,0.03609,0.71390
+Amazon-VG,SimGCL,Fresh channel only,20,0.10199,0.04891,0.73490
+Amazon-VG,SimGCL,Fresh channel only,21,0.11451,0.05364,0.73173
+Amazon-VG,SimGCL,Fresh channel only,22,0.10467,0.05097,0.72122
+Amazon-VG,SimGCL,STFR (shared gain),20,0.10508,0.04971,0.73072
+Amazon-VG,SimGCL,STFR (shared gain),21,0.10730,0.05259,0.73309
+Amazon-VG,SimGCL,STFR (shared gain),22,0.10558,0.05089,0.73283
+Amazon-VG,SimGCL,STFR,20,0.11249,0.05259,0.69176
+Amazon-VG,SimGCL,STFR,21,0.11237,0.05381,0.69168
+Amazon-VG,SimGCL,STFR,22,0.11526,0.05519,0.68990

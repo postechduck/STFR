@@ -1,0 +1,98 @@
+{
+ "Amazon-Movies": {
+  "content": {
+   "PDA_popularity.csv": "4516c6d9e7c450f93e60228e7140334a5fefdc369c3f8716d415d177f0848d93",
+   "all_times.npy": "1a504f57c030034473c6f2b78268a58d2b4388a310be7394feacc603026f9c4d",
+   "item_frequency.csv": "42ce1312c75254e693be27a7a7b7f73280f2347226d297f87c0be161488d50c4",
+   "item_frequency_all_times.csv": "ac514e883e94368cd36cbe0468cb9e82e98551db7de4371e8c35a9b190c08bb0",
+   "raw_interactions.csv": "8ddd6819049b1b9c5d432a0034a832b85450076246cab884899458a1e1144097",
+   "test_data.csv": "0326ca32a9e2d9bce5af3c18a3e2a6a4f8d5e98607b9268458f66628c401f216",
+   "test_list.txt": "46a81b9295a2c9e6d4cc4c2e7cc4c26d4eafda20bbac84cf091c81f3334c6e75",
+   "train_data.csv": "45eff43b759cc547967fb4100d2f4320d5f75855bb50f57d80677bcc6df9180c",
+   "train_list.txt": "afa9aea346c266391b98e4c06b793c60d5434487fba311b91e0537320302a22a",
+   "trainval_data.csv": "11bc963aacba6b0577d2addbbad581c7e7f25e25ae3ede96bbe2ee0d2331ffbc",
+   "trainval_list.txt": "8b9479a926e6b8d56af7720903ec080e7a59899404369e2faa4ef7ae9ed9c02f",
+   "val_data.csv": "a1c7ece56e89857c5861aa3a9731c23944156a3cbaf2d7708df15dc02690dd3a",
+   "val_list.txt": "b66aa7743b3f0fd379f7a13a040c63e979a8c00cf49db70a88892ac4edbaf850"
+  },
+  "files": {
+   "PDA_popularity.csv": "97d1d9ca66ca062f85c42d3e219a7d7586ef0e0b944ea341275f36b51d08b4d8",
+   "all_times.npy": "d5145f5eca10d8447604296097ea51270a277af3f1eb5fa010ac89bcd622642b",
+   "item_frequency.csv": "6744c58c6791fa5c00a7fd28b382b89f2ec00bdcdfbc16c430f03ecb99db5414",
+   "item_frequency_all_times.csv": "662733b345ffd597f96fd8a8656792c6c35c10b5995b663d0bbb21d42614fcbc",
+   "raw_interactions.csv": "1df22953443727f95aeeffa1b5fa581491bf48c1c3d2e441358189bca581326d",
+   "test_data.csv": "b1756bbe4071c21ec591f1882c3c21603ab15e75e9f4d379bf21b4638fa53184",
+   "test_list.txt": "a69e3bb7cd965821f62c786b78b5db522016935ab34baaf1b7bfc2d864bb4b67",
+   "train_data.csv": "de5d0154a86bffe38446c0ef2fda5f2538b50166ff7d6f00bc23bad59e79a345",
+   "train_list.txt": "fa1304d2455b2fe78b6c82ee909b4b1bbf4ff06de936d4ee7537a49f394a655c",
+   "trainval_data.csv": "b22117f2fe410e4a33c27baa7da8c6c8915b7cc581c8eb66744a1dfa58d97cf2",
+   "trainval_list.txt": "5fdb08cc0af5bd25c01943e4d6af419f45fb36692296ce612646509d25573c1d",
+   "val_data.csv": "9002c29d1abb7454842074ab2dfe51f2ff44c126a38865dac364c916a6c80963",
+   "val_list.txt": "e9336ab5a3ba4008a88318d8f14cb9ed36530d14e54afb1c0f3abefcfd738f89"
+  }
+ },
+ "Amazon-VG": {
+  "content": {
+   "PDA_popularity.csv": "3912e8d7b6767d0135417902cc5dd3d30196ee91745cbd8705b7ad7f1c916b91",
+   "all_times.npy": "50b7a53b7a1a4023d56d4cd789b82280c761c3043837b3cbe9a25dca62d3cd84",
+   "item_frequency.csv": "9f1457e11ae3b8ce23c375d11c68456fd106efd46c37e652a73e3194f44e6011",
+   "item_frequency_all_times.csv": "f823ffcb080a32fc817e04280da3e18d3cd7c182d9cd459d9bb6add618e23752",
+   "raw_interactions.csv": "fdee95474c976dddfd9e0af9577e6b3a0a5f75758881703364f445062221151c",
+   "test_data.csv": "529cb6869600f9b576fa6b65b1a1ac527e45ed4c87ab568dcd2f3d66e0d4d954",
+   "test_list.txt": "4349d38f67bbe3e947cf5dc5cfb667e411394419a85182b6e8c71f6fcfe64440",
+   "train_data.csv": "cf574bd900b9f5c4a5028b937007a6f431412ac3b4a639f597d69fe6594bef22",
+   "train_list.txt": "bd65aa6b646788c0187015bd0b4ea80a5deda8aff8ed1ee47196451d3d58ffe8",
+   "trainval_data.csv": "97f3e38d21b3ef34923187dca913227384e4b54c4f2d3eb13880226d63343090",
+   "trainval_list.txt": "5d1b3961eb3d4f6ad8d5dc2576745b2544cdb340408639ab7a00b5840206a78f",
+   "val_data.csv": "74c197d81a9b0e8be48e267b24d0e8121cf1fb1678c006be65e5651d96e9edc8",
+   "val_list.txt": "fc8342ca4b233380a62616c41aa6e1679b7e4b47f915bbacf6d1c02b915767b9"
+  },
+  "files": {
+   "PDA_popularity.csv": "230b85bc42f2a40b31e3186e4fce878b34e5b1efe34355514e197e05483a932d",
+   "all_times.npy": "466ba49aa8c089a3ebe2898454210982286c208eb9cf2e3a23d2fea02416298d",
+   "item_frequency.csv": "42b2561489e8fdd3ddc8f092491e21809cac5be7b3ab9805988e1b0a73147fc9",
+   "item_frequency_all_times.csv": "d165a5916072c758751150edeb2b8fc9ea725758b734d97519521ce682fb97b2",
+   "raw_interactions.csv": "60f2dff6b8f4608d80aa0695da6737c1eaf32703857aa2b03709677556166f6c",
+   "test_data.csv": "738be3b537162f38c22897ea130baf8419cf38f9c4556f24a549298c7a783bd8",
+   "test_list.txt": "b36345bb2bdec493552b6b7ac1a2dde8d9ac43ffc20b911e620ac654620d422a",
+   "train_data.csv": "19f14b1d7b8ccf293bbfac26d1e030679554ba3988a5c1cb6a0064374a4525d2",
+   "train_list.txt": "43551be9ee289dcb17f3310a4bc01d0017063f6ad83d07bec860ba65bf73f958",
+   "trainval_data.csv": "b852a73b964bbc634b88bf91c8cdf2644daf96cdfd1b45028e96ba9abf9fb3f6",
+   "trainval_list.txt": "d56f9cf65de964077f8cf164e64aeefa55d73227ee1532ccaf12d3801b148182",
+   "val_data.csv": "620f261bff0787fd4465fc33a2257131a8ee96f94db78a2d57d9cfd36acdf8e2",
+   "val_list.txt": "25ea10ac2a73009ef6421900db1f084d9f4ec152917e624d6ef6c07509a33b58"
+  }
+ },
+ "Douban-movie": {
+  "content": {
+   "PDA_popularity.csv": "f5968f5c783543eafe7d11fe20b1cbf77afeddfd530a3506b1f2464139fd08ad",
+   "all_times.npy": "319d92e7664ba8c4101e108e5b93c25a843864e889019a6057a436ea60ec0ed6",
+   "item_frequency.csv": "bf3fec69d4163fc3ed86b210d57739d3a1530369256df0c86172edfa5cca2b33",
+   "item_frequency_all_times.csv": "f4c216b4d8ac328475bda962f826500546fc18791963d1df293861ffd191a4b1",
+   "raw_interactions.csv": "e01c86c20da579217a8063db6a7b04169a81d0f9f09829cf6d806e399d2e241c",
+   "test_data.csv": "eae0c555fee3a3cd230667d4aace54a20e5683bae115c3af86f53864af80f2f7",
+   "test_list.txt": "f8412a40fc34da755dcf58d6c38445c54641e66f9bda615ee4244b1c33a16bf8",
+   "train_data.csv": "9e7f2d62a7391aaa7f07d671a7ac369bd7cd89a5ae12d9a2b4c0bb7c0d30c56c",
+   "train_list.txt": "3d39fd8ade9bbf67f59f02ed10874817243631c42bedf17392ce6f0af75b3a42",
+   "trainval_data.csv": "21dd760aeda5ccd20669c9db14ed01a8c961fa77d908ebcd4d97278071c26c32",
+   "trainval_list.txt": "d874eca189cb2769268d0a7800872092dc4d10a7ab8887494797ff00e9898a5f",
+   "val_data.csv": "0ddca857d385577a475b79cc47a78e0f27070c5549649fa1a844bcc755e0c8c1",
+   "val_list.txt": "46387b261bbadc7e613145c1a041727f140845727cbf8238797f7dfa5039d8b6"
+  },
+  "files": {
+   "PDA_popularity.csv": "796718a0ef7517ef0e83242e9d085be33e112e82a1200050ada768685fe0729a",
+   "all_times.npy": "b111b6614ecc746ba530b76ef313ff7bdca953b569e9d735813b0531ca245a47",
+   "item_frequency.csv": "e20ce899e63dd432d89da6a5dd0b01d822068fc99222d949f590dbced612d0c0",
+   "item_frequency_all_times.csv": "84e693c27e604b91ba8c164988245f67fa7323c15aa3f74d17f05d22c1d44de8",
+   "raw_interactions.csv": "a0f7d89dae09557ad2aca3beba5becff4c6411923966ac3fe33f022bb815b701",
+   "test_data.csv": "2768828c5bb2b0c33e027a7117763f352a5b6b2d45281f5702ece51826bc0cfe",
+   "test_list.txt": "c992717759e2d1a70725983649b345c7cdb9a29b4187c12e5a0abf446e8ae7ad",
+   "train_data.csv": "00d07b23484a5421faeeb75ab2c906f7be2d9180aa3c3b81b4e5c0c4b249e3fb",
+   "train_list.txt": "dc7c40f77873140e79deb4659f2b94456d39c54a41b2e9f0e21f052248afbbcf",
+   "trainval_data.csv": "792c60b9c4500a0a21a0c51ead2d5e13e1a7d7c685718a06906484eaf508890a",
+   "trainval_list.txt": "6682213c8901b7712ce13b898ea44d5740eecc8db8eda09187cccfd5cf13d404",
+   "val_data.csv": "2c51f92dc923c83bfed2d7b3ce5b31a0a8d49b5261ec8bb6f0f6da3618b04527",
+   "val_list.txt": "545097a0ae0b7c831aaad4c681a4c9526ae133633674bbf0ef36aaf6d601659a"
+  }
+ }
+}
